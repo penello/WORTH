@@ -21,11 +21,12 @@ public class hash_project implements Serializable {
         project new_project = new project(projectname);
         if(progetti.putIfAbsent(projectname, new_project) != null) return "Il progetto " + projectname + " è già stato creato";
         if(!new_project.add_member(username)) return "errore nell'aggiunta dell'utente come membro";
+        new_project.setip();
         hash_users obj =singleton_db.getInstanceUtenti();
         user utente = obj.get_user(username);
         utente.add_project(projectname);
         //TODO: serializzare e notificare la creazione di un nuovo utente
-        return "Il progetto "+projectname+" è stato creato correttamente";
+        return "SUCCESS ";
     }
 
 
@@ -33,21 +34,24 @@ public class hash_project implements Serializable {
         project proj = progetti.get(projectname);
         if(proj == null) return "Il progetto "+projectname+" non esiste";
         else if(!proj.add_member(username)) return "l'utente "+username+" è già un membro del progetto";
+        if(!proj.containsmember(username)) return "Permesso non valido per eseguire l'operzione";
         hash_users obj = singleton_db.getInstanceUtenti();
         user utente = obj.get_user(username);
         utente.add_project(projectname);
-        return "l'utente "+username+" è stato aggiunto correttamente come membro del progetto "+projectname;
+        return "SUCCESS ";
     }
 
-    public LinkedList<String> show_members(String projectname){
+    public LinkedList<String> show_members(String projectname, String username){
         project proj = progetti.get(projectname);
         if(proj == null) return null;
+        else if(!proj.containsmember(username)) return null;
         return proj.getMembri();
     }
 
-    public LinkedList<String> show_cards(String projectname){
+    public LinkedList<String> show_cards(String projectname,String username){
         project proj = progetti.get(projectname);
         if(proj == null) return null;
+        else if(proj.containsmember(username)) return null;
         return proj.getAllcards();
     }
 
@@ -56,7 +60,7 @@ public class hash_project implements Serializable {
         if(proj == null) return "il progetto "+projectname+" non esiste";
         card carta = proj.Getcard(cardname);
         if(carta == null) return "la carta "+cardname+" non esiste";
-        return "La carta "+cardname+" si trova nella lista "+carta.getlist()+", la sua descrizione è: "+carta.getDescription();
+        return "SUCCESS La carta "+cardname+" si trova nella lista "+carta.getlist()+", la sua descrizione è: "+carta.getDescription();
     }
 
     public String add_card(String projectname, String cardname, String descrizione){
@@ -78,11 +82,11 @@ public class hash_project implements Serializable {
         if(proj == null) return "il progetto "+projectname+" non esiste";
         card carta = proj.Getcard(cardname);
         if(carta == null) return "la carta "+cardname+" non esiste";
-        String s = " ";
+        String s = "SUCCESS Lista dei movimenti della card "+cardname+" ";
 
         Iterator<String> iterator = (carta.getHistory()).iterator();
         while(iterator.hasNext()){
-            s = s+iterator.next()+" ";
+            s = s+iterator.next()+"|";
         }
         return s;
     }
@@ -92,7 +96,7 @@ public class hash_project implements Serializable {
         if(proj == null) return "il progetto "+projectname+" non esiste";
         if(!proj.allcarddone()) return "Alcune card non sono state completate, impossibile eliminare il progetto";
         progetti.remove(projectname);
-        return "progetto eliminato con successo";
+        return "SUCCESS ";
     }
 
     public boolean member(String projectname){

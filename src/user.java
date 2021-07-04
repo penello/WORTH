@@ -1,3 +1,5 @@
+import org.apache.commons.codec.digest.DigestUtils;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -9,9 +11,10 @@ public class user implements Serializable {
     private ArrayList<String> lista_progetti;
 
     public user(String nick, String psswd){
-        //TODO: SHA256 di password
+        //TODO: SHA256 di password, controllare se possso farlo senza la libreria pazza e nel caso non posso riferire nella relazione questa cosa
+        String sha256hex = DigestUtils.sha256Hex(psswd);
         username = nick;
-        password = psswd;
+        password = sha256hex;
         stato = "offline";
         lista_progetti = new ArrayList<String>();
     }
@@ -28,6 +31,8 @@ public class user implements Serializable {
         return stato;
     }
 
+    public synchronized ArrayList<String> getLista_progetti() {return lista_progetti;}
+
     public synchronized void vai_on(){
         if (stato.equals("online")){
             //TODO: raise Exception
@@ -43,7 +48,8 @@ public class user implements Serializable {
     }
 
     public synchronized boolean verify_password(String password){
-        //TODO: equals dello SHA256 di password
+        //TODO: equals dello SHA256 di password dirlo alla proff
+        String sha256hex = DigestUtils.sha256Hex(password);
         return password.equals(this.password);
     }
 

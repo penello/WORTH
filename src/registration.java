@@ -12,7 +12,7 @@ public class registration extends RemoteServer implements registration_int {
 
     public registration() {}
 
-    public void avvio_rmi(){
+    public void start(){
         try {
             registration_int stub = (registration_int) UnicastRemoteObject.exportObject(this, 0);
             LocateRegistry.createRegistry(porta_rmi);
@@ -34,16 +34,5 @@ public class registration extends RemoteServer implements registration_int {
         else return "nickutente e password non validi";
         return ret;
 
-        /**if(nickutente.isEmpty()==false && Password.isEmpty()==false){
-            if(utenti.member(nickutente)) return "l'utente "+nickutente+" è già registrato";
-            synchronized (utenti){
-                user newuser = new user(nickutente,Password);
-                utenti.add_user(newuser);
-                //to do: serializzare e notificare la creazione di un nuovo utente
-            }
-        }
-        else return "nickutente e password non validi";
-        return "l'utente "+nickutente+" è stato registrato correttamente";
-         */
     }
 }

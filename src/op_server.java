@@ -2,12 +2,14 @@ import javax.naming.PartialResultException;
 import java.io.*;
 import java.net.Socket;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 public class op_server implements Runnable{
 
     private Socket socket;
     private String op;
+    private String username = null;
 
     public op_server(Socket socket){
         this.socket = socket;
@@ -32,9 +34,6 @@ public class op_server implements Runnable{
                             break;
                         case ("logout"):
                             logout(args);
-                            break;
-                        case ("listusers"):
-                            getlistusers();
                             break;
                         case ("listonlineusers"):
                             getonlineusers(args);
@@ -66,12 +65,6 @@ public class op_server implements Runnable{
                         case ("getcardhistory"):
                             getcardhistory(args);
                             break;
-                        case ("readchat"):
-                            readchat(args);
-                            break;
-                        case ("sendchatmsg"):
-                            sendchatmsg(args);
-                            break;
                         case ("cancelproject"):
                             cancelproject(args);
                             break;
@@ -96,7 +89,13 @@ public class op_server implements Runnable{
         String ret;
 
         hash_users obj = singleton_db.getInstanceUtenti();
-        ret = obj.login(username,password);
+        if (obj.login(username,password)){
+            this.username = username;
+            ret = "SUCCESS "+obj.getUsers();
+        }
+        else{
+            ret = "Username o Password errati";
+        }
         return ret;
 
         //RITORNARE LA LISTA DEGLI UTENTI REGISTRATI, CHIEDERE A FRANESCO PIRRò HIHIHIHIHIHIHIH
@@ -106,19 +105,20 @@ public class op_server implements Runnable{
     //qui per effettuare il logout voglio pure la password perchè non so come gestire il fatto che magari lui voglia disconnettere un altro utente dandomi solo il nickname
     //TODO match utente con il socket
     public String logout(String[] args){
+        if(this.username == null) return "Accesso negato a questa operazione";
 
-        String username = args[1];
         String ret;
 
         hash_users obj = singleton_db.getInstanceUtenti();
-        ret = obj.logout(username);
+        ret = obj.logout(this.username);
+        this.username = null;
         return ret;
     }
 
     //TODO: String username = match con socket;
     public String createproject(String[] args){
+        if(this.username == null) return "Accesso negato a questa operazione";
         String projectname = args[1];
-        String username;
         String ret;
 
         //TODO: prendere username dal socket
@@ -128,6 +128,7 @@ public class op_server implements Runnable{
     }
 
     public String addmember(String[] args){
+        if(this.username == null) return "Accesso negato a questa operazione";
         String projectname = args[1];
         String username = args[2];
         String ret;
@@ -137,23 +138,36 @@ public class op_server implements Runnable{
         return ret;
     }
 
-    public LinkedList<String> showmembers(String[] args){
+    public String showmembers(String[] args){
+        if(this.username == null) return "Accesso negato a questa operazione";
         String projectname = args[1];
+        String ret = "SUCCESS ";
 
         hash_project obj = singleton_db.getInstanceProgetti();
-        LinkedList<String> membri = obj.show_members(projectname);
-        return membri;
+        LinkedList<String> membri = obj.show_members(projectname,this.username);
+        Iterator<String> iterator = membri.iterator();
+        while(iterator.hasNext()){
+            ret = ret+iterator.next();
+        }
+        return ret;
     }
 
-    public LinkedList<String> showcards(String[] args){
+    public String showcards(String[] args){
+        if(this.username == null) return "Accesso negato a questa operazione";
         String projectname = args[1];
+        String ret = "SUCCESS ";
 
         hash_project obj = singleton_db.getInstanceProgetti();
-        LinkedList<String> carte = obj.show_cards(projectname);
-        return carte;
+        LinkedList<String> carte = obj.show_cards(projectname, this.username);
+        Iterator<String> iterator = carte.iterator();
+        while(iterator.hasNext()){
+            ret = ret+iterator.next();
+        }
+        return ret;
     }
 
     public String showcard(String[] args){
+        if(this.username == null) return "Accesso negato a questa operazione";
         String projectname = args[1];
         String cardname = args[2];
         String ret;
@@ -206,6 +220,7 @@ public class op_server implements Runnable{
     }
 
     public String getonlineusers(String arg[]){
+        if(this.username == null) return "Accesso negato a questa operazione";
         String ret;
         hash_users obj = singleton_db.getInstanceUtenti();
         ret = obj.get_onlineusers();
@@ -214,15 +229,13 @@ public class op_server implements Runnable{
 
     //TODO: match socket con username grazie mille
     public String getlistproject(String[] arg){
+        if(this.username == null) return "Accesso negato a questa operazione";
         String ret;
-        String username;
 
         hash_users obj = singleton_db.getInstanceUtenti();
         ret = obj.get_listproject(username);
         return ret;
     }
-
-
 
 
 

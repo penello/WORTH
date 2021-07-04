@@ -1,5 +1,6 @@
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Random;
 
 public class project {
 
@@ -10,6 +11,7 @@ public class project {
     private final LinkedList<card> done;
     private final LinkedList<String> membri;
     private final LinkedList<String> allcards;
+    private String ip_multicast;
 
     public project(String projectname){
         this.projectname = projectname;
@@ -19,6 +21,7 @@ public class project {
         toberevised = new LinkedList<card>();
         done = new LinkedList<card>();
         allcards = new LinkedList<String>();
+        ip_multicast = null;
     }
 
     public String getProjectname(){
@@ -46,24 +49,28 @@ public class project {
     public LinkedList<String> getAllcards() {return allcards;}
 
 
+
     public boolean add_member(String username){
         if(membri.contains(username)) return false;
         membri.add(username);
         return true;
     }
 
-    /**
-    public boolean addmember(user utent){
-        user utente = utent;
-        String username = utente.getUsername();
-        String password = utente.getPassword();
-        if(membri.member(utente.getUsername())) return false;
-        membri.add_user(username, password);
-        return true;
-    }*/
 
     public boolean containsmember(String username){
         return membri.contains(username);
+    }
+
+    //non controllo se hgo gia un ip uguale perchè probabilità è 1/16M
+    public void setip(){
+        int i;
+        String r = "239";
+        Random rand = new Random();
+        for(i = 0; i<3; i++){
+            Integer x = rand.nextInt(256);
+            r = "."+ x.toString();
+        }
+        this.ip_multicast = r;
     }
 
 
@@ -72,7 +79,7 @@ public class project {
         card newcard = new card(cardname, description);
         allcards.add(cardname);
         todo.add(newcard);
-        return "la card "+cardname+" è stata creata correttamente";
+        return "SUCCESS ";
     }
 
     public card Getcard(String cardname){
@@ -118,19 +125,19 @@ public class project {
                 todo.remove(carta);
                 carta.addhistory("inprogress");
                 inprogress.add(carta);
-                return_msg = "card spostata con successo da TODO a INPROGRESS";
+                return_msg = "SUCCESS ";
             }
             if(lista_partenza.equals("inprogress")){
                 inprogress.remove(carta);
                 if(lista_destinazione.equals("done")){
                     carta.addhistory("done");
                     done.add(carta);
-                    return_msg = "card spostata con successo da INPROGRESS a DONE";
+                    return_msg = "SUCCESS ";
                 }
                 else if(lista_destinazione.equals("toberevised")){
                     carta.addhistory("toberevised");
                     toberevised.add(carta);
-                    return_msg = "card spostata con successo da INPROGRESS a TOBEREVISED";
+                    return_msg = "SUCCESS ";
                 }
             }
             if(lista_partenza.equals("toberevised")){
@@ -138,12 +145,12 @@ public class project {
                 if(lista_destinazione.equals("done")){
                     carta.addhistory("done");
                     done.add(carta);
-                    return_msg = "carta spostata con successo da TOBEREVISED a DONE";
+                    return_msg = "SUCCESS ";
                 }
                 else if(lista_destinazione.equals("inprogress")){
                     carta.addhistory("inprogress");
                     inprogress.add(carta);
-                    return_msg = "carta spostata con successo da TOBEREVISED a INPROGRESS";
+                    return_msg = "SUCESS ";
                 }
             }
         }
