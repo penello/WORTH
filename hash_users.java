@@ -1,5 +1,6 @@
 import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class hash_users implements Serializable {
 
@@ -41,6 +42,7 @@ public class hash_users implements Serializable {
 
     }
 
+    //TODO: fare il logout anche se cade connessione
     public String logout(String username){
 
         user ut = utenti.get(username);
@@ -51,6 +53,23 @@ public class hash_users implements Serializable {
             //TODO:notiicare la modifica
         }
         return "logout effettuato con successo";
+    }
+
+    public String get_onlineusers(){
+        AtomicReference<String> str = new AtomicReference<>(" ");
+        utenti.forEach((k,v)->{
+            if((v.getStato()).equals("online")){
+                str.set(str + k +" ");
+            }
+        });
+        String ret = str.toString();
+        return ret;
+    }
+
+    public String get_listproject(String username){
+        user utente = utenti.get(username);
+        if(utente == null) return "Utente inesistente, prego registrarsi";
+        
     }
 
 }

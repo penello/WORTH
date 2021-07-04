@@ -1,3 +1,4 @@
+import javax.naming.PartialResultException;
 import java.io.*;
 import java.net.Socket;
 import java.util.Collection;
@@ -22,7 +23,7 @@ public class op_server implements Runnable{
                 BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
-                while ((op = reader.readLine()).isEmpty()!=false ){
+                while (!(op = reader.readLine()).isEmpty()){
                     String[] args = op.split(" ");
 
                     switch (args[0]) {
@@ -83,7 +84,7 @@ public class op_server implements Runnable{
                 }
 
             }catch (IOException e){
-
+                e.printStackTrace();
             }
         }
 
@@ -144,7 +145,84 @@ public class op_server implements Runnable{
         return membri;
     }
 
-    
+    public LinkedList<String> showcards(String[] args){
+        String projectname = args[1];
+
+        hash_project obj = singleton_db.getInstanceProgetti();
+        LinkedList<String> carte = obj.show_cards(projectname);
+        return carte;
+    }
+
+    public String showcard(String[] args){
+        String projectname = args[1];
+        String cardname = args[2];
+        String ret;
+
+        hash_project obj = singleton_db.getInstanceProgetti();
+        ret = obj.show_card(projectname, cardname);
+        return ret;
+    }
+
+    public String addcard(String[] args){
+        String projectname = args[1];
+        String cardname = args[2];
+        String descrizione = args[3];
+        String ret;
+
+        hash_project obj = singleton_db.getInstanceProgetti();
+        ret = obj.add_card(projectname,cardname,descrizione);
+        return ret;
+    }
+
+    public String movecard(String[] args){
+        String projectname = args[1];
+        String cardname = args[2];
+        String listapartenza = args[3];
+        String listadestinazione = args[4];
+        String ret;
+
+        hash_project obj = singleton_db.getInstanceProgetti();
+        ret = obj.move_card(projectname,cardname,listapartenza,listadestinazione);
+        return ret;
+    }
+
+    public String getcardhistory(String[] args){
+        String projectname = args[1];
+        String cardname = args[2];
+        String ret;
+
+        hash_project obj = singleton_db.getInstanceProgetti();
+        ret = obj.get_cardhistory(projectname,cardname);
+        return ret;
+    }
+
+    public String cancelproject(String[] args){
+        String projectname = args[1];
+        String ret;
+
+        hash_project obj = singleton_db.getInstanceProgetti();
+        ret = obj.cancell_project(projectname);
+        return ret;
+    }
+
+    public String getonlineusers(String arg[]){
+        String ret;
+        hash_users obj = singleton_db.getInstanceUtenti();
+        ret = obj.get_onlineusers();
+        return ret;
+    }
+
+    //TODO: match socket con username grazie mille
+    public String getlistproject(String[] arg){
+        String ret;
+        String username;
+
+        hash_users obj = singleton_db.getInstanceUtenti();
+        ret = obj.get_listproject(username);
+        return ret;
+    }
+
+
 
 
 

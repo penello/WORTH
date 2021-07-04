@@ -6,14 +6,14 @@ public class user implements Serializable {
     private String username;
     private String password;
     private String stato;
-    private ArrayList<project> lista_progetti;
+    private ArrayList<String> lista_progetti;
 
     public user(String nick, String psswd){
         //TODO: SHA256 di password
         username = nick;
         password = psswd;
         stato = "offline";
-        lista_progetti = new ArrayList<project>();
+        lista_progetti = new ArrayList<String>();
     }
 
     public synchronized String getUsername(){
@@ -45,5 +45,9 @@ public class user implements Serializable {
     public synchronized boolean verify_password(String password){
         //TODO: equals dello SHA256 di password
         return password.equals(this.password);
+    }
+
+    public boolean add_project(String projectname){
+        return lista_progetti.add(projectname);
     }
 }

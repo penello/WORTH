@@ -43,6 +43,8 @@ public class project {
 
     public LinkedList<String> getMembri() {return membri;}
 
+    public LinkedList<String> getAllcards() {return allcards;}
+
 
     public boolean add_member(String username){
         if(membri.contains(username)) return false;
@@ -151,6 +153,12 @@ public class project {
     public LinkedList<String> get_history(String cardname){
         card carta = Getcard(cardname);
         return carta.getHistory();
+    }
+
+    public boolean allcarddone(){
+        if(!todo.isEmpty()) return false;
+        if(!inprogress.isEmpty()) return false;
+        return toberevised.isEmpty();
     }
 
 
