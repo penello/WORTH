@@ -22,9 +22,13 @@ public class hash_project implements Serializable {
         if(progetti.putIfAbsent(projectname, new_project) != null) return "Il progetto " + projectname + " è già stato creato";
         if(!new_project.add_member(username)) return "errore nell'aggiunta dell'utente come membro";
         new_project.setip();
-        hash_users obj =singleton_db.getInstanceUtenti();
+        hash_users obj =singleton_db_utenti.getInstanceUtenti();
         user utente = obj.get_user(username);
         utente.add_project(projectname);
+        persistent_data prs = persistent_data.getInstance();
+        if(!prs.create_dir(projectname)){
+            return "Impossibile creare la directory";
+        }
         //TODO: serializzare e notificare la creazione di un nuovo utente
         return "SUCCESS ";
     }
@@ -35,7 +39,7 @@ public class hash_project implements Serializable {
         if(proj == null) return "Il progetto "+projectname+" non esiste";
         else if(!proj.add_member(username)) return "l'utente "+username+" è già un membro del progetto";
         if(!proj.containsmember(username)) return "Permesso non valido per eseguire l'operzione";
-        hash_users obj = singleton_db.getInstanceUtenti();
+        hash_users obj = singleton_db_utenti.getInstanceUtenti();
         user utente = obj.get_user(username);
         utente.add_project(projectname);
         return "SUCCESS ";

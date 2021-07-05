@@ -25,7 +25,7 @@ public class registration extends RemoteServer implements registration_int {
 
     public String register(String nickutente, String Password) throws RemoteException{
 
-        hash_users obj = singleton_db.getInstanceUtenti();
+        hash_users obj = singleton_db_utenti.getInstanceUtenti();
         String ret;
 
         if(!nickutente.isEmpty() && !Password.isEmpty()){

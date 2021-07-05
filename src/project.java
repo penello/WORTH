@@ -48,6 +48,8 @@ public class project {
 
     public LinkedList<String> getAllcards() {return allcards;}
 
+    public String getIp_multicast(){ return ip_multicast;}
+
 
 
     public boolean add_member(String username){

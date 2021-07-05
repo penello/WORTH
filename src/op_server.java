@@ -4,12 +4,14 @@ import java.net.Socket;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
-
+@SuppressWarnings("InfiniteLoopStatement")
 public class op_server implements Runnable{
 
     private Socket socket;
     private String op;
     private String username = null;
+    private BufferedWriter writer;
+    private BufferedReader reader;
 
     public op_server(Socket socket){
         this.socket = socket;
@@ -21,9 +23,9 @@ public class op_server implements Runnable{
 
         while(true){
 
-            try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+            try{
+                reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
                 while (!(op = reader.readLine()).isEmpty()){
                     String[] args = op.split(" ");
@@ -69,11 +71,6 @@ public class op_server implements Runnable{
                             cancelproject(args);
                             break;
                     }
-
-
-
-
-
                 }
 
             }catch (IOException e){
@@ -83,12 +80,12 @@ public class op_server implements Runnable{
 
     }
 
-    public String login(String[] args){
+    public void login(String[] args){
         String username = args[1];
         String password = args[2];
-        String ret;
+        String ret = null;
 
-        hash_users obj = singleton_db.getInstanceUtenti();
+        hash_users obj = singleton_db_utenti.getInstanceUtenti();
         if (obj.login(username,password)){
             this.username = username;
             ret = "SUCCESS "+obj.getUsers();
@@ -96,148 +93,148 @@ public class op_server implements Runnable{
         else{
             ret = "Username o Password errati";
         }
-        return ret;
-
-        //RITORNARE LA LISTA DEGLI UTENTI REGISTRATI, CHIEDERE A FRANESCO PIRRò HIHIHIHIHIHIHIH
-
+        sendanswer(ret);
     }
 
-    //qui per effettuare il logout voglio pure la password perchè non so come gestire il fatto che magari lui voglia disconnettere un altro utente dandomi solo il nickname
-    //TODO match utente con il socket
-    public String logout(String[] args){
-        if(this.username == null) return "Accesso negato a questa operazione";
+    public void logout(String[] args){
+        String ret = null;
 
-        String ret;
+        if(this.username == null) ret = "Accesso negato a questa operazione";
+        String username = args[1];
+        if(!username.equals(this.username)) ret = "Permessi non sufficienti per disconnettere un altro utente";
 
-        hash_users obj = singleton_db.getInstanceUtenti();
+        hash_users obj = singleton_db_utenti.getInstanceUtenti();
         ret = obj.logout(this.username);
         this.username = null;
-        return ret;
+        sendanswer(ret);
     }
 
-    //TODO: String username = match con socket;
-    public String createproject(String[] args){
-        if(this.username == null) return "Accesso negato a questa operazione";
+    public void createproject(String[] args){
+        String ret = null;
+        if(this.username == null) ret = "Accesso negato a questa operazione";
         String projectname = args[1];
-        String ret;
 
-        //TODO: prendere username dal socket
-        hash_project obj = singleton_db.getInstanceProgetti();
+        hash_project obj = singleton_db_progetti.getInstanceProgetti();
         ret = obj.add_project(projectname,username);
-        return ret;
+        sendanswer(ret);
     }
 
-    public String addmember(String[] args){
-        if(this.username == null) return "Accesso negato a questa operazione";
+    public void addmember(String[] args){
+        String ret = null;
+        if(this.username == null) ret = "Accesso negato a questa operazione";
         String projectname = args[1];
         String username = args[2];
-        String ret;
 
-        hash_project obj = singleton_db.getInstanceProgetti();
+        hash_project obj = singleton_db_progetti.getInstanceProgetti();
         ret = obj.add_projectmember(projectname, username);
-        return ret;
+        sendanswer(ret);
     }
 
-    public String showmembers(String[] args){
-        if(this.username == null) return "Accesso negato a questa operazione";
+    public void showmembers(String[] args){
+        String ret = null;
+        if(this.username == null) ret = "Accesso negato a questa operazione";
         String projectname = args[1];
-        String ret = "SUCCESS ";
 
-        hash_project obj = singleton_db.getInstanceProgetti();
+        hash_project obj = singleton_db_progetti.getInstanceProgetti();
         LinkedList<String> membri = obj.show_members(projectname,this.username);
         Iterator<String> iterator = membri.iterator();
         while(iterator.hasNext()){
             ret = ret+iterator.next();
         }
-        return ret;
+        sendanswer("SUCCESS "+ret);
     }
 
-    public String showcards(String[] args){
-        if(this.username == null) return "Accesso negato a questa operazione";
+    public void showcards(String[] args){
+        String ret = null;
+        if(this.username == null) ret = "Accesso negato a questa operazione";
         String projectname = args[1];
-        String ret = "SUCCESS ";
 
-        hash_project obj = singleton_db.getInstanceProgetti();
+        hash_project obj = singleton_db_progetti.getInstanceProgetti();
         LinkedList<String> carte = obj.show_cards(projectname, this.username);
         Iterator<String> iterator = carte.iterator();
         while(iterator.hasNext()){
             ret = ret+iterator.next();
         }
-        return ret;
+        sendanswer(ret);
     }
 
-    public String showcard(String[] args){
-        if(this.username == null) return "Accesso negato a questa operazione";
+    public void showcard(String[] args){
+        String ret = null;
+        if(this.username == null) ret = "Accesso negato a questa operazione";
         String projectname = args[1];
         String cardname = args[2];
-        String ret;
 
-        hash_project obj = singleton_db.getInstanceProgetti();
+        hash_project obj = singleton_db_progetti.getInstanceProgetti();
         ret = obj.show_card(projectname, cardname);
-        return ret;
+        sendanswer(ret);
     }
 
-    public String addcard(String[] args){
+    public void addcard(String[] args){
         String projectname = args[1];
         String cardname = args[2];
         String descrizione = args[3];
-        String ret;
+        String ret = null;
 
-        hash_project obj = singleton_db.getInstanceProgetti();
+        hash_project obj = singleton_db_progetti.getInstanceProgetti();
         ret = obj.add_card(projectname,cardname,descrizione);
-        return ret;
+        sendanswer(ret);
     }
 
-    public String movecard(String[] args){
+    public void movecard(String[] args){
         String projectname = args[1];
         String cardname = args[2];
         String listapartenza = args[3];
         String listadestinazione = args[4];
-        String ret;
+        String ret = null;
 
-        hash_project obj = singleton_db.getInstanceProgetti();
+        hash_project obj = singleton_db_progetti.getInstanceProgetti();
         ret = obj.move_card(projectname,cardname,listapartenza,listadestinazione);
-        return ret;
+        sendanswer(ret);
     }
 
-    public String getcardhistory(String[] args){
+    public void getcardhistory(String[] args){
         String projectname = args[1];
         String cardname = args[2];
-        String ret;
+        String ret = null;
 
-        hash_project obj = singleton_db.getInstanceProgetti();
+        hash_project obj = singleton_db_progetti.getInstanceProgetti();
         ret = obj.get_cardhistory(projectname,cardname);
-        return ret;
+        sendanswer(ret);
     }
 
-    public String cancelproject(String[] args){
+    public void cancelproject(String[] args){
         String projectname = args[1];
-        String ret;
+        String ret = null;
 
-        hash_project obj = singleton_db.getInstanceProgetti();
+        hash_project obj = singleton_db_progetti.getInstanceProgetti();
         ret = obj.cancell_project(projectname);
-        return ret;
+        sendanswer(ret);
     }
 
-    public String getonlineusers(String arg[]){
-        if(this.username == null) return "Accesso negato a questa operazione";
-        String ret;
-        hash_users obj = singleton_db.getInstanceUtenti();
+    public void getonlineusers(String arg[]){
+        String ret = null;
+        if(this.username == null) ret = "Accesso negato a questa operazione";
+        hash_users obj = singleton_db_utenti.getInstanceUtenti();
         ret = obj.get_onlineusers();
-        return ret;
+        sendanswer(ret);
     }
 
-    //TODO: match socket con username grazie mille
-    public String getlistproject(String[] arg){
-        if(this.username == null) return "Accesso negato a questa operazione";
-        String ret;
+    public void getlistproject(String[] arg){
+        String ret = null;
+        if(this.username == null) ret = "Accesso negato a questa operazione";
 
-        hash_users obj = singleton_db.getInstanceUtenti();
+        hash_users obj = singleton_db_utenti.getInstanceUtenti();
         ret = obj.get_listproject(username);
-        return ret;
+        sendanswer(ret);
     }
 
-
+    public void sendanswer(String answer){
+        try {
+            writer.write(answer);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
 
 
 }

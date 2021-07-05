@@ -20,6 +20,8 @@ public class hash_users implements Serializable {
     public String add_user(String username, String password){
         user new_user = new user(username, password);
         if(utenti.putIfAbsent(username, new_user) != null) return "l'utente " + username + " è già registrato";
+        persistent_data prs =persistent_data.getInstance();
+        if(!prs.save_user(new_user)) return "Impossibile salvare in maniera persistente l'utente";
         //TODO: serializzare e notificare la creazione di un nuovo utente
         return "SUCCESS l'utente "+username+" è stato registrato correttamente";
     }
