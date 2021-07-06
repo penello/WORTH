@@ -9,7 +9,7 @@ public class project {
     private final LinkedList<card> inprogress;
     private final LinkedList<card> toberevised;
     private final LinkedList<card> done;
-    private final LinkedList<String> membri;
+    private LinkedList<String> membri;
     private final LinkedList<String> allcards;
     private String ip_multicast;
 
@@ -21,7 +21,7 @@ public class project {
         toberevised = new LinkedList<card>();
         done = new LinkedList<card>();
         allcards = new LinkedList<String>();
-        ip_multicast = null;
+        ip_multicast = setip();
     }
 
     public String getProjectname(){
@@ -52,6 +52,10 @@ public class project {
 
 
 
+    public void copy_member(LinkedList<String> member){
+        this.membri = member;
+    }
+
     public boolean add_member(String username){
         if(membri.contains(username)) return false;
         membri.add(username);
@@ -63,8 +67,8 @@ public class project {
         return membri.contains(username);
     }
 
-    //non controllo se hgo gia un ip uguale perchè probabilità è 1/16M
-    public void setip(){
+    //non controllo se ho già un ip uguale perchè probabilità è 1/16M
+    public String setip(){
         int i;
         String r = "239";
         Random rand = new Random();
@@ -72,9 +76,14 @@ public class project {
             Integer x = rand.nextInt(256);
             r = "."+ x.toString();
         }
-        this.ip_multicast = r;
+        return r;
     }
 
+    public void copy_card(card carta){
+        card newcard = new card(carta.getName(),carta.getDescription(),carta.getHistory());
+        allcards.add(carta.getName());
+        getlist(carta.getlist()).add(newcard);
+    }
 
     public String addcard(String cardname, String description){
         if(allcards.contains(cardname)) return "la card "+cardname+" è già presente";
@@ -101,6 +110,18 @@ public class project {
             if (carta.getName().equals(cardname))
                 return carta;
         }
+        return null;
+    }
+
+    public LinkedList<card> getlist(String listName){
+        if(listName.equals("todo"))
+        return todo;
+        if(listName.equals("inprogress"))
+            return inprogress;
+        if(listName.equals("toberevised"))
+            return toberevised;
+        if(listName.equals("done"))
+            return done;
         return null;
     }
 

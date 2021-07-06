@@ -1,7 +1,10 @@
+import java.io.File;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+
 
 public class hash_project implements Serializable {
 
@@ -21,16 +24,25 @@ public class hash_project implements Serializable {
         project new_project = new project(projectname);
         if(progetti.putIfAbsent(projectname, new_project) != null) return "Il progetto " + projectname + " è già stato creato";
         if(!new_project.add_member(username)) return "errore nell'aggiunta dell'utente come membro";
-        new_project.setip();
         hash_users obj =singleton_db_utenti.getInstanceUtenti();
         user utente = obj.get_user(username);
         utente.add_project(projectname);
-        persistent_data prs = persistent_data.getInstance();
-        if(!prs.create_dir(projectname)){
-            return "Impossibile creare la directory";
-        }
-        //TODO: serializzare e notificare la creazione di un nuovo utente
         return "SUCCESS ";
+    }
+
+    public boolean restore_project(String projectname){
+        project new_project = new project(projectname);
+        return progetti.putIfAbsent(projectname, new_project) == null;
+    }
+
+    public void restore_member(LinkedList<String> member, String projectname){
+        project prj = progetti.get(projectname);
+        prj.copy_member(member);
+    }
+
+    public void restore_card(card carta,String projectname){
+        project prj = progetti.get(projectname);
+        prj.copy_card(carta);
     }
 
 
@@ -38,7 +50,6 @@ public class hash_project implements Serializable {
         project proj = progetti.get(projectname);
         if(proj == null) return "Il progetto "+projectname+" non esiste";
         else if(!proj.add_member(username)) return "l'utente "+username+" è già un membro del progetto";
-        if(!proj.containsmember(username)) return "Permesso non valido per eseguire l'operzione";
         hash_users obj = singleton_db_utenti.getInstanceUtenti();
         user utente = obj.get_user(username);
         utente.add_project(projectname);
@@ -78,6 +89,8 @@ public class hash_project implements Serializable {
         project proj = progetti.get(projectname);
         if(proj == null) return "il progetto "+projectname+" non esiste";
         String ret = proj.movecard(cardname,listapartenza,listadestinazione);
+        persistent_data prs = persistent_data.getInstance();
+        if(!prs.save(prs.getProject_folder()+cardname+".json",proj.Getcard(cardname),card.class)) ret = "impossibile salvare in modo persistente i dati";
         return ret;
     }
 
@@ -101,10 +114,6 @@ public class hash_project implements Serializable {
         if(!proj.allcarddone()) return "Alcune card non sono state completate, impossibile eliminare il progetto";
         progetti.remove(projectname);
         return "SUCCESS ";
-    }
-
-    public boolean member(String projectname){
-        return progetti.containsKey(projectname);
     }
 
 }

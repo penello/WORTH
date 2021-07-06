@@ -1,11 +1,4 @@
-
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 
 
 public class persistent_data {
@@ -47,6 +40,22 @@ public class persistent_data {
         return istanza;
     }
 
+    public String getUser_folder(){ return user_folder;}
+
+    public String getProject_folder(){ return project_folder;}
+
+    public boolean save(String path, Object obj, Class<?> type){
+        try (ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(path));) {
+
+            output.writeObject(type.cast(obj)); // salvo in modo persistente le informazioni del progetto
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+
     public boolean create_dir(String projectname){
         if(! new File(project_folder).exists()) return false;
         String dir = projectname+"/";
@@ -60,34 +69,4 @@ public class persistent_data {
             return false;
         }
     }
-
-    public boolean save_user(user utente){
-        if(! new File(user_folder).exists()) return false;
-        JSONObject usr = new JSONObject();
-
-        try {
-            usr.put("username", utente.getUsername());
-            usr.put("password", utente.getPassword());
-            usr.put("stato","offline");
-            JSONArray project_array = new JSONArray();
-            for (String s:utente.getLista_progetti()){
-                project_array.add(s);
-            }
-            usr.put("project_list",project_array);
-        }catch (Exception e){
-            e.printStackTrace();
-            return false;
-        }
-        try (FileWriter file = new FileWriter(user_folder+"Utenti.json")) {
-            //We can write any JSONArray or JSONObject instance to the file
-            file.write(usr.toJSONString());
-            file.flush();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-
 }

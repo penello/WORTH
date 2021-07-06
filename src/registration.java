@@ -30,6 +30,8 @@ public class registration extends RemoteServer implements registration_int {
 
         if(!nickutente.isEmpty() && !Password.isEmpty()){
             ret = obj.add_user(nickutente,Password);
+            persistent_data prs = persistent_data.getInstance();
+            if(!prs.save(prs.getUser_folder()+"utenti.json",obj,hash_users.class)) return "impossibile salvare in maniera persistente l'utente";
         }
         else return "nickutente e password non validi";
         return ret;

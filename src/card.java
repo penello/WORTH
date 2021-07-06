@@ -14,6 +14,13 @@ public class card implements Serializable {
         history.add("todo");
     }
 
+    public card (String nome, String descrizione, LinkedList<String> history){
+        this.name = nome;
+        this.description = descrizione;
+        this.history = history;
+        this.history.add("todo");
+    }
+
     public String getName() {
         return name;
     }
