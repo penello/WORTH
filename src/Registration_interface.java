@@ -6,7 +6,7 @@ import java.rmi.RemoteException;
  * Permette a un Utente di registrarsi al servizio con Username e Password
  */
 
-public interface registration_int extends Remote {
+public interface Registration_interface extends Remote {
     /**
      * @overview: metodo che permette all'utente la registrazione al servizio
      * @return: ritorna una stringa che descrive l'esito dell'operazione

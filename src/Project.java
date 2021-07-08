@@ -1,25 +1,24 @@
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Random;
 
-public class project {
+public class Project {
 
     private final String projectname;
-    private final LinkedList<card> todo;
-    private final LinkedList<card> inprogress;
-    private final LinkedList<card> toberevised;
-    private final LinkedList<card> done;
+    private final LinkedList<Card> todo;
+    private final LinkedList<Card> inprogress;
+    private final LinkedList<Card> toberevised;
+    private final LinkedList<Card> done;
     private LinkedList<String> membri;
     private final LinkedList<String> allcards;
     private String ip_multicast;
 
-    public project(String projectname){
+    public Project(String projectname){
         this.projectname = projectname;
         membri = new LinkedList<String>();
-        todo = new LinkedList<card>();
-        inprogress = new LinkedList<card>();
-        toberevised = new LinkedList<card>();
-        done = new LinkedList<card>();
+        todo = new LinkedList<Card>();
+        inprogress = new LinkedList<Card>();
+        toberevised = new LinkedList<Card>();
+        done = new LinkedList<Card>();
         allcards = new LinkedList<String>();
         ip_multicast = setip();
     }
@@ -28,19 +27,19 @@ public class project {
         return projectname;
     }
 
-    public LinkedList<card> getTodo(){
+    public LinkedList<Card> getTodo(){
         return todo;
     }
 
-    public LinkedList<card> getInprogress(){
+    public LinkedList<Card> getInprogress(){
         return inprogress;
     }
 
-    public LinkedList<card> getToberevised(){
+    public LinkedList<Card> getToberevised(){
         return toberevised;
     }
 
-    public LinkedList<card> getDone(){
+    public LinkedList<Card> getDone(){
         return done;
     }
 
@@ -79,41 +78,41 @@ public class project {
         return r;
     }
 
-    public void copy_card(card carta){
-        card newcard = new card(carta.getName(),carta.getDescription(),carta.getHistory());
+    public void copy_card(Card carta){
+        Card newcard = new Card(carta.getName(),carta.getDescription(),carta.getHistory());
         allcards.add(carta.getName());
         getlist(carta.getlist()).add(newcard);
     }
 
     public String addcard(String cardname, String description){
         if(allcards.contains(cardname)) return "la card "+cardname+" è già presente";
-        card newcard = new card(cardname, description);
+        Card newcard = new Card(cardname, description);
         allcards.add(cardname);
         todo.add(newcard);
         return "SUCCESS ";
     }
 
-    public card Getcard(String cardname){
-        for(card carta : todo) {
+    public Card Getcard(String cardname){
+        for(Card carta : todo) {
             if (carta.getName().equals(cardname))
                 return carta;
         }
-        for(card carta : inprogress) {
+        for(Card carta : inprogress) {
             if (carta.getName().equals(cardname))
                 return carta;
         }
-        for(card carta : toberevised) {
+        for(Card carta : toberevised) {
             if (carta.getName().equals(cardname))
                 return carta;
         }
-        for(card carta : done) {
+        for(Card carta : done) {
             if (carta.getName().equals(cardname))
                 return carta;
         }
         return null;
     }
 
-    public LinkedList<card> getlist(String listName){
+    public LinkedList<Card> getlist(String listName){
         if(listName.equals("todo"))
         return todo;
         if(listName.equals("inprogress"))
@@ -142,7 +141,7 @@ public class project {
             if(lista_destinazione.equals("todo")) return "Dalla lista TOBERIVISED la card può essere spostata solo nelle liste INPROGRESS e DONE";
         }
 
-        card carta = Getcard(cardname);
+        Card carta = Getcard(cardname);
         if(carta.getlist().equals(lista_partenza)){
             if(lista_partenza.equals("todo")){
                 todo.remove(carta);
@@ -181,7 +180,7 @@ public class project {
     }
 
     public LinkedList<String> get_history(String cardname){
-        card carta = Getcard(cardname);
+        Card carta = Getcard(cardname);
         return carta.getHistory();
     }
 

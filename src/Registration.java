@@ -5,19 +5,20 @@ import java.rmi.server.RemoteServer;
 import java.rmi.server.UnicastRemoteObject;
 
 
-public class registration extends RemoteServer implements registration_int {
+public class Registration extends UnicastRemoteObject implements Registration_interface {
 
-    //private hash_users utenti;
     private int porta_rmi = 2048;
 
-    public registration() {}
+    public Registration() throws RemoteException {
+        super();
+    }
 
     public void start(){
         try {
-            registration_int stub = (registration_int) UnicastRemoteObject.exportObject(this, 0);
+            //Registration_interface stub = (Registration_interface) UnicastRemoteObject.exportObject(this, 5000);
             LocateRegistry.createRegistry(porta_rmi);
             Registry r = LocateRegistry.getRegistry(porta_rmi);
-            r.rebind("RegisterUser", stub);
+            r.rebind("Sign in", this);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -25,13 +26,13 @@ public class registration extends RemoteServer implements registration_int {
 
     public String register(String nickutente, String Password) throws RemoteException{
 
-        hash_users obj = singleton_db_utenti.getInstanceUtenti();
+        Hash_users obj = Singleton_db_utenti.getInstanceUtenti();
         String ret;
 
         if(!nickutente.isEmpty() && !Password.isEmpty()){
             ret = obj.add_user(nickutente,Password);
-            persistent_data prs = persistent_data.getInstance();
-            if(!prs.save(prs.getUser_folder()+"utenti.json",obj,hash_users.class)) return "impossibile salvare in maniera persistente l'utente";
+            Persistent_data prs = Persistent_data.getInstance();
+            if(!prs.save(prs.getUser_folder()+"utenti.json",obj, Hash_users.class)) return "impossibile salvare in maniera persistente l'utente";
         }
         else return "nickutente e password non validi";
         return ret;

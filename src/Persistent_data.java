@@ -1,15 +1,15 @@
 import java.io.*;
 
 
-public class persistent_data {
-    private final String absolute_path = "~/IdeaProjects/WORTH/";
+public class Persistent_data {
+    private final String absolute_path = "./";
     private final String project_folder = absolute_path+"Projects_folder/";
     private final String user_folder = absolute_path+"User_folder/";
 
-    private volatile static persistent_data istanza = null;
+    private volatile static Persistent_data istanza = null;
 
 
-    private persistent_data() {
+    private Persistent_data() {
         File file = new File(project_folder);
         File file2 = new File(user_folder);
         if(!file.exists()){
@@ -28,12 +28,12 @@ public class persistent_data {
         }
     }
 
-    public static persistent_data getInstance(){
+    public static Persistent_data getInstance(){
         if(istanza == null){
-            synchronized (persistent_data.class){
+            synchronized (Persistent_data.class){
                 //non sono sicuro di essere il primo thread ad aver preso la lock quindi ricontrollo istanza
                 if(istanza == null){
-                    istanza = new persistent_data();
+                    istanza = new Persistent_data();
                 }
             }
         }

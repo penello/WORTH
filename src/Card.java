@@ -1,20 +1,20 @@
 import java.io.Serializable;
 import java.util.LinkedList;
 
-public class card implements Serializable {
+public class Card implements Serializable {
 
     private String name;
     private String description;
     private LinkedList<String> history;
 
-    public card(String nome, String descrizione){
+    public Card(String nome, String descrizione){
         name = nome;
         description = descrizione;
         history = new LinkedList<String>();
         history.add("todo");
     }
 
-    public card (String nome, String descrizione, LinkedList<String> history){
+    public Card(String nome, String descrizione, LinkedList<String> history){
         this.name = nome;
         this.description = descrizione;
         this.history = history;
