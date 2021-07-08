@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
@@ -5,7 +6,6 @@ import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -15,41 +15,49 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ClientMain {
 
-    private static ConcurrentHashMap<String, User> utenti_registrati;
+    public ConcurrentHashMap<String,User> utenti_registrati;
+    public ClientMain(){
+        this.utenti_registrati = new ConcurrentHashMap<String,User>();
+    }
 
-    private static Registry registration_registry;
-    private static Registration_interface registration;
+
     private static boolean  log_in;
     private static boolean ok = true;
+    private static Registration_interface registration;
 
 
     public static void main(String[] args){
 
+        ClientMain client = new ClientMain();
+        JFrame frame = new JFrame("worth");
+        Main_GUI main_gui = new Main_GUI(frame);
+        String message = null;
+        String result = null;
         log_in = false;
 
-        utenti_registrati = new ConcurrentHashMap<String,User>();
-        // socket per la connessione TCP
         BufferedReader reader; // stream dal server TCP al client
         BufferedWriter writer; // stream dal client TCP al server
 
         System.out.println("Welcome in WORTH");
         System.out.println("Please login or register to proceed.");
 
-        String message = null;
-        String result = null;
+
 
         try (Socket socket = new Socket();
              BufferedReader cmd_line = new BufferedReader(new InputStreamReader(System.in));) {
 
             // RMI- ottengo un riferimento all'oggetto remoto in modo da utilizzare i suoi metodi
-            //LocateRegistry.createRegistry(2048);
-            registration_registry = LocateRegistry.getRegistry(2048); // recupero la registry sulla porta RMI
-            registration = (Registration_interface) registration_registry.lookup("Sign in"); // richiedo l'oggetto
-            // dal nome pubblico
+            // recupero la registry sulla porta RMI
+            Registry registration_registry = LocateRegistry.getRegistry(2048);
+            // richiedo l'oggetto dal nome pubblico
+            registration = (Registration_interface) registration_registry.lookup("Sign in");
 
-            // Callbacks
-            CbClientImplementation callbackObj = new CbClientImplementation(utenti_registrati);
+            // Callbacks RMI
+            //Creo l'oggetto esportato con i metodi che può usare il server per aggiornare la struttura dati
+            CbClientImplementation callbackObj = new CbClientImplementation(client.utenti_registrati);
+            // recupero la registry sulla porta RMI
             Registry registry = LocateRegistry.getRegistry(2089);
+            // richiedo l'oggetto dal nome pubblico
             CbServerInterface server = (CbServerInterface) registry.lookup("Callback");
 
             // TCP Connection
@@ -69,82 +77,67 @@ public class ClientMain {
                     if (message.startsWith("close")) {
                         ok = false;
                         break;
-                    } else if (message.startsWith("login")) {   // LOGIN - utente accede alla piattaforma
-                        server.RegisterForCallback(callbackObj); // chiede al server di registrarsi per la callback
-                    } else if (message.startsWith("register")) { // REGISTER- utente si registra alla piattaforma
-                        registerFunction(myArgs);
+                    }
+                    if(!message.startsWith("login") && !log_in){
+                        System.out.println("Effettuare il login prima di ogni altra operazione");
                         continue;
-                    } else if (message.startsWith("listUsers")) { // LISTUSERS- visualizza lista utenti
-                        listUsersFunction();
-                        continue;
-                    } else if (message.startsWith("listOnlineUsers")) { // LISTONLINEUSERS- visualizza lista utenti online
-                        listOnlineUsersFunction();
-                        continue;
-                    }/** else if (message.startsWith("sendChat")) {        // SEND CHAT - invia un messaggio sulla chat
-                        result = sendChatHandler(myArgs);
-                        System.out.println("< " + result);
-                        continue;
-                    } else if (message.startsWith("readChat")) {        //READ CHAT - legge i messaggi dalla chat
-                        ArrayList<String> messages = readChatHandler(myArgs);
-                        System.out.println("< You have " + (messages.size()-1) + " unread messages: ");
-                        for (String msg : messages)
-                            System.out.println("\t" + msg);
-                        continue;
-                    }*/
+                    }
+                    else {
+                        //operazione per registrarsi al servizio
+                        if (message.startsWith("register")) {
+                            registerFunction(myArgs);
+                            continue;
+                            //operazione per visualizzare la lista degli utenti registrati al servizio
+                        } else if (message.startsWith("listUsers")) {
+                            client.listUsersFunction();
+                            continue;
+                            //operazione per visualizzare la lista degli utenti registrati al servizio e in stato online
+                        } else if (message.startsWith("listOnlineUsers")) {
+                            client.listOnlineUsersFunction();
+                            continue;
+                        }
+                    }
 
-                    writer.write(message + "\r\n");                     // invio la richiesta al server
+                    writer.write(message + "\r\n");
                     writer.flush();
-                    while (!(result = reader.readLine()).isEmpty()) {  // leggo la risposta del server
-
-                        /*if (message.startsWith("joinChat") && !result.startsWith("Error"))
-                            result = " join chat"; /**joinChat(result);*/
-                        /**else*/ if (message.startsWith("login") && result.startsWith("SUCCESS")) { // gestisco lo stato a seguito del login
+                    while (!(result = reader.readLine()).isEmpty()) {
+                        if (message.startsWith("login") && result.startsWith("SUCCESS")) {
                             log_in = true;
-                        } else if (message.startsWith("logout") && result.startsWith("SUCCESS")) { // gestisco lo stato a seguito del logout
-                            server.UnregisterForCallback(callbackObj); // mi disiscrivo dal servizio di notifica
+                            server.RegisterForCallback(callbackObj);
+                            //aggiorno la struttura dati locale con quella aggiornata passata con la callback
+                            client.utenti_registrati = callbackObj.gethashmap();
+                        } else if (message.startsWith("logout") && result.startsWith("SUCCESS")) {
+                            server.UnregisterForCallback(callbackObj);
                             log_in = false;
-                            //chats.clear();                      //resetto le strutture dati per una nuova sessione
-                            utenti_registrati.clear();
+                            client.utenti_registrati.clear();
                         }
                         System.out.println("< " + result);
                     }
-
                 } catch (Exception e) {
                     System.out.println("An error occurred.");
                     e.printStackTrace();
                 }
-
             }
 
             //il client termina in maniera pulita
             UnicastRemoteObject.unexportObject(callbackObj, false);
             if (server != null)
-                server.UnregisterForCallback(callbackObj); // mi disiscrivo dalle callback
-
-            //for (Chat c : chats.values())   //termino l'ascolto su tutte le chat
-            //    c.close();
+                server.UnregisterForCallback(callbackObj);
         }catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void registerFunction(String[] myArgs) throws RemoteException, NotBoundException {
-
+    public static void registerFunction(String[] myArgs) throws RemoteException {
         String result;
-
         if(log_in)
             result = "Error. Log out before new registration";
         else
-            result = registration.register(myArgs[1],myArgs[2]);     //RMI- invoco il metodo remoto
-
+            result = registration.register(myArgs[1],myArgs[2]);
         System.out.println("< "+result);
     }
 
-
-    /*
-        @Overview: funzione che esamina la lista locale degli utenti
-    */
-    public static void listUsersFunction(){
+    public void listUsersFunction(){
         String result = "List of all users";
         System.out.println("< "+result);
 
@@ -157,10 +150,7 @@ public class ClientMain {
         System.out.flush();
     }
 
-    /*
-        @Overview: funzione che esamina la lista locale degli utenti online
-    */
-    private static void listOnlineUsersFunction() {
+    private void listOnlineUsersFunction() {
         String result = "Online users";
         System.out.println("< "+result);
 
@@ -175,93 +165,4 @@ public class ClientMain {
         System.out.flush();
     }
 
-    /*
-        @Overview: collego l'utente alla chat del progetto
-    */
-    /**
-    private static String joinChat(String result){
-
-        String[] data = result.split(" ");
-        String username = data[0];
-        String projectName = data[1];
-        String ip = data[2];
-        int port = Integer.parseInt(data[3]);
-
-        Chat c = chats.get(projectName);
-        try{
-            c.equals(null);
-            if(c.isValid())
-                return "Error. You have already joined this chat";
-            return "Error. This chat has been deleted";
-        }catch(NullPointerException e){ }
-
-        Chat chat =  new Chat(username, ip, port);
-        new Thread(chat).start();
-        chats.put(projectName, chat);
-        return "User joined project's chat";
-    }
-
-    /*
-        @Overview: leggo dal 'buffer' della chat che contiene i messaggi non letti
-    */
-    /**
-    private static ArrayList<String> readChatHandler(String[] myArgs){
-
-        ArrayList<String> out = new ArrayList<String>();
-        if(myArgs.length != 2){
-            out.add("Error. Use readChat projectName");
-            return out;
-        }
-
-        String projectName = myArgs[1];
-        Chat chat = chats.get(projectName);
-
-        try{
-            chat.equals(null);
-        }catch(NullPointerException e){
-            out.add("Error. You have not joined this chat");
-            return out;
-        }
-
-        if(!chat.isValid()){            //se sto provando a leggere da una chat, di un progetto eliminato
-            chats.remove(projectName);  //rimuovo la entry
-            out.add("Error. You're trying to read the chat from a deleted project");
-        }
-        else
-            out = (ArrayList<String>)chat.getMessages();    //altrimenti eseguo la funzione
-        return out;
-    }
-
-
-    /*
-        @Overview: invio un messaggio nella chat
-    */
-    /**
-    private static String sendChatHandler(String[] myArgs) {
-
-        if(myArgs.length < 3)
-            return "Error. Use sendChat projectName message";
-
-        String projectName = myArgs[1];
-
-        Chat chat = chats.get(projectName);
-        try{
-            chat.equals(null);
-        }catch(NullPointerException e){
-            return "Error. You have not joined this chat";
-        }
-
-        if(!chat.isValid()){                //se sto provando a leggere da una chat, di un progetto eliminato
-            chats.remove(projectName);      //rimuovo la entry
-            return "Error. You're trying to write in the chat of a deleted project";
-        }
-        //altrimenti ci scrivo
-        String message = "";
-        for (int i = 2; i < myArgs.length; i++)
-            message = message + myArgs[i]+" ";
-
-        chat.sendMessage(message);
-        return "Message sent";
-    }
-     */
 }

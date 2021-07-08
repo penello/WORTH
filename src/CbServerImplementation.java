@@ -1,8 +1,11 @@
+import javax.imageio.IIOException;
+import java.io.*;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CbServerImplementation extends UnicastRemoteObject implements CbServerInterface {
 
@@ -14,8 +17,19 @@ public class CbServerImplementation extends UnicastRemoteObject implements CbSer
         clients = new ArrayList<CbClientInterface>();
     }
 
-    public synchronized void RegisterForCallback(CbClientInterface callbackClient) throws RemoteException{
-        if (!clients.contains(callbackClient)) { clients.add(callbackClient); }
+    public synchronized void RegisterForCallback(CbClientInterface callbackClient) throws RemoteException, IOException, ClassNotFoundException {
+        if (!clients.contains(callbackClient)) {
+            clients.add(callbackClient);
+            ConcurrentHashMap<String, User> utenti = Singleton_db_utenti.getInstanceUtenti().get_concurrent_hashmap();
+            ByteArrayOutputStream byteout = new ByteArrayOutputStream();
+            ObjectOutputStream output = new ObjectOutputStream(byteout);
+            output.writeObject(utenti);
+            output.flush();
+            output.close();
+            byteout.close();
+            byte b[] = byteout.toByteArray();
+            callbackClient.notifyUtenti(b);
+        }
     }
     /* annulla registrazione per il callback */
     public synchronized void UnregisterForCallback(CbClientInterface callbackClient) throws RemoteException{
@@ -29,7 +43,7 @@ public class CbServerImplementation extends UnicastRemoteObject implements CbSer
     private synchronized void doCallbacks(User utente) throws RemoteException{
         Iterator<CbClientInterface> i = clients.iterator( );
         while (i.hasNext()) {
-            CbClientInterface client = i.next();
+            CbClientInterface client = (CbClientInterface) i.next();
             client.notifyMe(utente);
         }
     }

@@ -17,6 +17,10 @@ public class Hash_users implements Serializable {
         return utenti.get(username);
     }
 
+    public ConcurrentHashMap<String, User> get_concurrent_hashmap(){
+        return utenti;
+    }
+
     public String add_user(String username, String password){
         User new_user = new User(username, password);
         if(utenti.putIfAbsent(username, new_user) != null) return "l'utente " + username + " è già registrato";
@@ -37,7 +41,6 @@ public class Hash_users implements Serializable {
         else{
             if(!ut.verify_password(password)) return false;
             ut.vai_on();
-            //TODO:notificare la modifica
         }
         return true;
     }

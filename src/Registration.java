@@ -8,9 +8,11 @@ import java.rmi.server.UnicastRemoteObject;
 public class Registration extends UnicastRemoteObject implements Registration_interface {
 
     private int porta_rmi = 2048;
+    private CbServerImplementation server;
 
-    public Registration() throws RemoteException {
+    public Registration(CbServerImplementation server) throws RemoteException {
         super();
+        this.server = server;
     }
 
     public void start(){
@@ -33,9 +35,10 @@ public class Registration extends UnicastRemoteObject implements Registration_in
             ret = obj.add_user(nickutente,Password);
             Persistent_data prs = Persistent_data.getInstance();
             if(!prs.save(prs.getUser_folder()+"utenti.json",obj, Hash_users.class)) return "impossibile salvare in maniera persistente l'utente";
+            User utente = Singleton_db_utenti.getInstanceUtenti().get_user(nickutente);
+            server.notifica(utente);
         }
         else return "nickutente e password non validi";
         return ret;
-
     }
 }

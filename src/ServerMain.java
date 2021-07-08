@@ -13,43 +13,50 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 @SuppressWarnings("InfiniteLoopStatement")
 public class ServerMain {
+
+    private static CbServerImplementation server;
     public static void main(String[] args){
 
+        //funzione per recuperare lo stato del servizio se ci sono dati salvati
         restoreBackup();
 
-        try { //registrazione presso il registry
-            CbServerImplementation server = new CbServerImplementation();
+        try {
+            //registrazione presso il registry per la callback
+            server = new CbServerImplementation();
             String name = "Callback";
             LocateRegistry.createRegistry(2089);
             Registry registry = LocateRegistry.getRegistry (2089);
-            registry.bind (name, server);
+            registry.rebind (name, server);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(-1);
         }
 
-
+        //avvio la connessione RMI per la fase di registrazione
         try{
-            new Registration().start();
+            new Registration(server).start();
         }catch (Exception e){
             e.printStackTrace();
         }
 
+        //avvio la connessione TCP
         try {
             ServerSocket listeningSocket = new ServerSocket();
-            listeningSocket.bind(new InetSocketAddress(InetAddress.getLocalHost(), 4685));      //il server resta in ascolto sulla porta 4569
-
-            ThreadPoolExecutor threadPool = (ThreadPoolExecutor) Executors.newCachedThreadPool();   //creo un threadpool
+            //il server resta in ascolto sulla porta 4569
+            listeningSocket.bind(new InetSocketAddress(InetAddress.getLocalHost(), 4685));
+            ThreadPoolExecutor threadPool = (ThreadPoolExecutor) Executors.newCachedThreadPool();
             while(true){
-                Socket socket = listeningSocket.accept();       //accetto le richieste di connessione da parte degli utenti
-                System.out.println("System: un utente si e' connesso al sistema");
-                threadPool.execute(new Op_server(socket));   //gestisco le loro richieste
+                //accetto le richieste di connessione da parte degli utenti
+                Socket socket = listeningSocket.accept();
+                //avvio un thread per client per gestire le loro richieste
+                threadPool.execute(new Op_server(socket,server));
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    //funzione per recuperaro lo stato precedente del servizio se ci sono dati salvati presenti
     private static void restoreBackup() {
         try{
             File recoveryDir = new File(Persistent_data.getInstance().getProject_folder());
