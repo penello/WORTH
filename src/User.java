@@ -1,4 +1,4 @@
-import org.apache.commons.codec.digest.DigestUtils;
+//import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -11,10 +11,11 @@ public class User implements Serializable {
     private ArrayList<String> lista_progetti;
 
     public User(String nick, String psswd){
-        //TODO: SHA256 di password, controllare se possso farlo senza la libreria pazza e nel caso non posso riferire nella relazione questa cosa
-        String sha256hex = DigestUtils.sha256Hex(psswd);
+        //TODO: SHA256 di password, controllare se possso farlo senza la libreria pazza e nel caso non posso riferire nella relazione
+        //String sha256hex = DigestUtils.sha256Hex(psswd);
         username = nick;
-        password = sha256hex;
+        //password = sha256hex;
+        password = psswd;
         stato = "offline";
         lista_progetti = new ArrayList<String>();
     }
@@ -49,8 +50,9 @@ public class User implements Serializable {
 
     public synchronized boolean verify_password(String password){
         //TODO: equals dello SHA256 di password dirlo alla proff
-        String sha256hex = DigestUtils.sha256Hex(password);
-        return sha256hex.equals(this.password);
+        //String sha256hex = DigestUtils.sha256Hex(password);
+        //return sha256hex.equals(this.password);
+        return password.equals(this.password);
     }
 
     public boolean add_project(String projectname){
