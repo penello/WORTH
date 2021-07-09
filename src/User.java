@@ -11,7 +11,7 @@ public class User implements Serializable {
     private ArrayList<String> lista_progetti;
 
     public User(String nick, String psswd){
-        //TODO: SHA256 di password, controllare se possso farlo senza la libreria pazza e nel caso non posso riferire nella relazione questa cosa
+        //TODO: SHA256 di password, controllare se possso farlo senza la libreria pazza e nel caso non posso riferire nella relazione
         String sha256hex = DigestUtils.sha256Hex(psswd);
         username = nick;
         password = sha256hex;
