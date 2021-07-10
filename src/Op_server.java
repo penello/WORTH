@@ -14,6 +14,7 @@ public class Op_server implements Runnable{
     private String access_denided ="Accesso negato per questa operazione";
     private String save_failed = "impossibile salvare in maniera persistete i dati";
     private BufferedWriter writer;
+    private BufferedReader reader;
     private CbServerImplementation server;
 
 
@@ -26,14 +27,23 @@ public class Op_server implements Runnable{
 
     @Override
     public void run() {
-        while(true){
+        boolean open = true;
 
-            try{
-                BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+        try{
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+        }
+        catch (IOException e){
+            open = false;
+            e.printStackTrace();
+        }
 
-
-                while (!(op = reader.readLine()).isEmpty()){
+        while (open){
+            try {
+                op = reader.readLine();
+                if (op == null) {
+                    open = false;
+                } else if (!op.isEmpty()) {
                     String[] args = op.split(" ");
 
                     switch (args[0]) {
@@ -41,7 +51,7 @@ public class Op_server implements Runnable{
                             login(args);
                             break;
                         case ("logout"):
-                            logout(args);
+                            logout(args,false);
                             break;
                         case ("listonlineusers"):
                             getonlineusers(args);
@@ -79,12 +89,26 @@ public class Op_server implements Runnable{
                         default:
                             sendanswer("Inserire un comando valido");
                     }
+                } else {
+                    sendanswer("Comando vuoto, inserire un comando valido");
                 }
-                sendanswer("Comando vuoto, inserire un comando valido");
-            }catch (IOException e){
-                //TODO: chiudere bene
-                e.printStackTrace();
             }
+            catch (IOException e){
+                open = false;
+            }
+        }
+        try{
+            if (username != null){
+                String args[] = new String[2];
+                args[0] = "logout";
+                args[1] = username;
+                logout(args, true);
+            }
+            this.socket.close();
+            System.out.println("Connessione Chiusa");
+        }
+        catch (IOException e){
+            e.printStackTrace();
         }
 
     }
@@ -114,7 +138,7 @@ public class Op_server implements Runnable{
         sendanswer(ret);
     }
 
-    public void logout(String[] args){
+    public void logout(String[] args, boolean forced){
         String ret = null;
         if(args.length!=2) ret = "comandi non inseriti correttamente";
         else {
@@ -127,7 +151,8 @@ public class Op_server implements Runnable{
                 this.username = null;
             }
         }
-        sendanswer(ret);
+        if (!forced)
+            sendanswer(ret);
     }
 
     public void createproject(String[] args){
@@ -201,9 +226,13 @@ public class Op_server implements Runnable{
             else {
                 Hash_project obj = Singleton_db_progetti.getInstanceProgetti();
                 LinkedList<String> carte = obj.show_cards(projectname, this.username);
-                Iterator<String> iterator = carte.iterator();
-                while (iterator.hasNext()) {
-                    ret = ret + iterator.next();
+                if(carte == null) ret = "Non ci sono carte nel progetto";
+                else {
+                    ret = "SUCCESS Lista delle carte: ";
+                    Iterator<String> iterator = carte.iterator();
+                    while (iterator.hasNext()) {
+                        ret = ret + iterator.next() + "|";
+                    }
                 }
             }
         }
@@ -343,7 +372,7 @@ public class Op_server implements Runnable{
 
     private void sendanswer(String answer){
         try {
-            writer.write(answer + "\n\r\n");
+            writer.write(answer + "\n");
             writer.flush();
         }catch (IOException e){
             e.printStackTrace();

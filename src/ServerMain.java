@@ -24,8 +24,7 @@ public class ServerMain {
             //registrazione presso il registry per la callback
             server = new CbServerImplementation();
             String name = "Callback";
-            LocateRegistry.createRegistry(2089);
-            Registry registry = LocateRegistry.getRegistry (2089);
+            Registry registry = LocateRegistry.createRegistry(4202);
             registry.rebind (name, server);
         } catch (Exception e) {
             e.printStackTrace();
@@ -43,7 +42,8 @@ public class ServerMain {
         try {
             ServerSocket listeningSocket = new ServerSocket();
             //il server resta in ascolto sulla porta 4569
-            listeningSocket.bind(new InetSocketAddress(InetAddress.getLocalHost(), 4685));
+            String s = InetAddress.getLocalHost().getHostAddress();
+            listeningSocket.bind(new InetSocketAddress(4300));
             ThreadPoolExecutor threadPool = (ThreadPoolExecutor) Executors.newCachedThreadPool();
             while(true){
                 //accetto le richieste di connessione da parte degli utenti

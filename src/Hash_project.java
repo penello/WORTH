@@ -64,7 +64,7 @@ public class Hash_project implements Serializable {
     public LinkedList<String> show_cards(String projectname,String username){
         Project proj = progetti.get(projectname);
         if(proj == null) return null;
-        else if(proj.containsmember(username)) return null;
+        else if(!proj.containsmember(username)) return null;
         return proj.getAllcards();
     }
 

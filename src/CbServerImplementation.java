@@ -4,6 +4,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -41,10 +42,24 @@ public class CbServerImplementation extends UnicastRemoteObject implements CbSer
         doCallbacks(utente);
     }
     private synchronized void doCallbacks(User utente) throws RemoteException{
-        Iterator<CbClientInterface> i = clients.iterator( );
+        Iterator<CbClientInterface> i = clients.iterator();
+        LinkedList<CbClientInterface> toRemove = new LinkedList<CbClientInterface>() ;
         while (i.hasNext()) {
             CbClientInterface client = (CbClientInterface) i.next();
-            client.notifyMe(utente);
+            try{
+                client.notifyMe(utente);
+            }
+            catch (IOException e){
+                toRemove.add(client);
+            }
+        }
+
+        //Rimuovo i client che mi hanno lanciato una eccezione
+        //Così evito di controllarli nuovamente
+        i = toRemove.iterator();
+        while (i.hasNext()){
+            CbClientInterface client = (CbClientInterface) i.next();
+            clients.remove(client);
         }
     }
 }

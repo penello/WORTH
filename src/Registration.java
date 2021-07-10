@@ -7,7 +7,7 @@ import java.rmi.server.UnicastRemoteObject;
 
 public class Registration extends UnicastRemoteObject implements Registration_interface {
 
-    private int porta_rmi = 2048;
+    private int porta_rmi = 4201;
     private CbServerImplementation server;
 
     public Registration(CbServerImplementation server) throws RemoteException {
@@ -18,9 +18,8 @@ public class Registration extends UnicastRemoteObject implements Registration_in
     public void start(){
         try {
             //Registration_interface stub = (Registration_interface) UnicastRemoteObject.exportObject(this, 5000);
-            LocateRegistry.createRegistry(porta_rmi);
-            Registry r = LocateRegistry.getRegistry(porta_rmi);
-            r.rebind("Sign in", this);
+            Registry registry = LocateRegistry.createRegistry(porta_rmi);
+            registry.rebind("Sign in", this);
         } catch (RemoteException e) {
             e.printStackTrace();
         }

@@ -17,9 +17,9 @@ public class ClientManager {
     private ConcurrentHashMap<String,User> utenti_registrati;
     private boolean log_in;
     private String Username;
-    private static int porta_tcp = 4685;
-    private static int porta_rmi_registry = 2048;
-    private static int porta_rmi_callback = 2089;
+    private static int porta_tcp = 4300;
+    private static int porta_rmi_registry = 4201;
+    private static int porta_rmi_callback = 4202;
     private Socket socket;
     private DatagramSocket socketudp;
     private static Registration_interface registration;
@@ -56,7 +56,7 @@ public class ClientManager {
         }
         try {
             socket = new Socket();
-            socket.connect(new InetSocketAddress(InetAddress.getLocalHost(), porta_tcp));
+            socket.connect(new InetSocketAddress("localhost", porta_tcp));
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
         } catch (IOException e){
@@ -68,9 +68,10 @@ public class ClientManager {
     }
 
     private void send_message(String msg) throws IOException{
-        writer.write(msg + "\r\n");
+        writer.write(msg + "\n");
         writer.flush();
     }
+
     private String read_message() throws IOException{
         String result;
         result = reader.readLine();
@@ -152,7 +153,7 @@ public class ClientManager {
 
     public String showcard(String projectName, String cardName) throws IOException {
         if(projectName == null || cardName == null) throw new NullPointerException();
-        send_message("showcard " + projectName + cardName);
+        send_message("showcard " + projectName + " " + cardName);
         String risposta = read_message();
         return risposta;
     }
