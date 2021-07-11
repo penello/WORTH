@@ -10,8 +10,9 @@ public class Registration extends UnicastRemoteObject implements Registration_in
     private int porta_rmi = 4201;
     private CbServerImplementation server;
 
-    public Registration(CbServerImplementation server) throws RemoteException {
+    public Registration(CbServerImplementation server, int port) throws RemoteException {
         super();
+        porta_rmi = port;
         this.server = server;
     }
 

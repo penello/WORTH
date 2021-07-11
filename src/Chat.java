@@ -43,6 +43,9 @@ public class Chat extends Thread {
                 String msg = readMessage();
                 chatBox.append(msg+"\n");
             }
+            catch (SocketException e){
+                break;
+            }
             catch (IOException e){
                 e.printStackTrace();
                 chatBox.append("Errore nella chat multicast\n");

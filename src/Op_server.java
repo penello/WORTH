@@ -16,12 +16,14 @@ public class Op_server implements Runnable{
     private BufferedWriter writer;
     private BufferedReader reader;
     private CbServerImplementation server;
+    private String MulticastPort;
 
 
 
-    public Op_server(Socket socket, CbServerImplementation server){
+    public Op_server(Socket socket, CbServerImplementation server,int multicastPort){
         this.socket = socket;
         this.server = server;
+        MulticastPort = Integer.toString(multicastPort);
     }
 
 
@@ -153,7 +155,7 @@ public class Op_server implements Runnable{
                 Hash_project obj = Singleton_db_progetti.getInstanceProgetti();
                 Project proj = obj.get_project(projectname);
                 //TODO: porta Configurabile
-                ret = "SUCCESS "+proj.getIp_multicast() +":"+"4400";
+                ret = "SUCCESS "+proj.getIp_multicast() +":"+MulticastPort;
             }
         }
         sendanswer(ret);
@@ -201,6 +203,9 @@ public class Op_server implements Runnable{
             String projectname = args[1];
             String username = args[2];
             if (this.username == null) ret = access_denided;
+            else if(Singleton_db_progetti.getInstanceProgetti().get_project(projectname) == null){
+                ret = "Il progetto non esiste";
+            }
             else if (!Singleton_db_progetti.getInstanceProgetti().get_project(projectname).containsmember(this.username))
                 ret = access_denided;
             else {
@@ -221,17 +226,22 @@ public class Op_server implements Runnable{
         if(args.length!=2) ret = "comandi non inseriti correttamente";
         else {
             String projectname = args[1];
-            if (this.username == null) ret = access_denided;
-            else if (!Singleton_db_progetti.getInstanceProgetti().get_project(projectname).containsmember(this.username))
-                ret = access_denided;
+            if(Singleton_db_progetti.getInstanceProgetti().get_project(projectname) == null){
+                ret = "Il progetto non esiste";
+            }
             else {
-                Hash_project obj = Singleton_db_progetti.getInstanceProgetti();
-                LinkedList<String> membri = obj.show_members(projectname, this.username);
-                Iterator<String> iterator = membri.iterator();
-                ret = "";
-                while (iterator.hasNext()) {
+                if (this.username == null) ret = access_denided;
+                else if (!Singleton_db_progetti.getInstanceProgetti().get_project(projectname).containsmember(this.username))
+                    ret = access_denided;
+                else {
+                    Hash_project obj = Singleton_db_progetti.getInstanceProgetti();
+                    LinkedList<String> membri = obj.show_members(projectname, this.username);
+                    Iterator<String> iterator = membri.iterator();
+                    ret = "";
+                    while (iterator.hasNext()) {
 
-                    ret = ret + iterator.next()+"|";
+                        ret = ret + iterator.next() + "|";
+                    }
                 }
             }
         }
@@ -244,6 +254,9 @@ public class Op_server implements Runnable{
         else {
             String projectname = args[1];
             if (this.username == null) ret = access_denided;
+            else if(Singleton_db_progetti.getInstanceProgetti().get_project(projectname) == null){
+                ret = "Il progetto non esiste";
+            }
             else if (!Singleton_db_progetti.getInstanceProgetti().get_project(projectname).containsmember(this.username))
                 ret = access_denided;
             else {
@@ -269,6 +282,9 @@ public class Op_server implements Runnable{
             String projectname = args[1];
             String cardname = args[2];
             if (this.username == null) ret = access_denided;
+            else if(Singleton_db_progetti.getInstanceProgetti().get_project(projectname) == null){
+                ret = "Il progetto non esiste";
+            }
             else if (!Singleton_db_progetti.getInstanceProgetti().get_project(projectname).containsmember(this.username))
                 ret = access_denided;
             else {
@@ -287,6 +303,9 @@ public class Op_server implements Runnable{
             String cardname = args[2];
             String descrizione = args[3];
             if (this.username == null) ret = access_denided;
+            else if(Singleton_db_progetti.getInstanceProgetti().get_project(projectname) == null){
+                ret = "Il progetto non esiste";
+            }
             else if (!Singleton_db_progetti.getInstanceProgetti().get_project(projectname).containsmember(this.username))
                 ret = access_denided;
             else {
@@ -309,6 +328,9 @@ public class Op_server implements Runnable{
             String listapartenza = args[3];
             String listadestinazione = args[4];
             if (this.username == null) ret = access_denided;
+            else if(Singleton_db_progetti.getInstanceProgetti().get_project(projectname) == null){
+                ret = "Il progetto non esiste";
+            }
             else if (!Singleton_db_progetti.getInstanceProgetti().get_project(projectname).containsmember(this.username))
                 ret = access_denided;
             else {
@@ -329,6 +351,9 @@ public class Op_server implements Runnable{
             String projectname = args[1];
             String cardname = args[2];
             if (this.username == null) ret = access_denided;
+            else if(Singleton_db_progetti.getInstanceProgetti().get_project(projectname) == null){
+                ret = "Il progetto non esiste";
+            }
             else if (!Singleton_db_progetti.getInstanceProgetti().get_project(projectname).containsmember(this.username))
                 ret = access_denided;
             else {
@@ -345,6 +370,9 @@ public class Op_server implements Runnable{
         else {
             String projectname = args[1];
             if (this.username == null) ret = access_denided;
+            else if(Singleton_db_progetti.getInstanceProgetti().get_project(projectname) == null){
+                ret = "Il progetto non esiste";
+            }
             else if (!Singleton_db_progetti.getInstanceProgetti().get_project(projectname).containsmember(this.username))
                 ret = access_denided;
             else {
@@ -382,7 +410,7 @@ public class Op_server implements Runnable{
 
     public void getlistproject(String[] arg){
         String ret = null;
-        if(arg.length!=1) ret = "comandi non inseriti correttamente";
+        if(arg.length!=2) ret = "comandi non inseriti correttamente";
         else {
             if (this.username == null) ret = access_denided;
             else {

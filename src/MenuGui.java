@@ -1,8 +1,5 @@
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.*;
 import java.io.IOException;
 import java.rmi.RemoteException;
 
@@ -40,6 +37,17 @@ public class MenuGui {
     private JTextArea chatbox;
     private JTextField messagge_field;
     private JButton sendButton;
+    private JTextArea textArea_cardhistory;
+    private JTextArea textArea_showcard;
+    private JTextArea textArea_listmember;
+    private JTextArea textArea_showcards;
+    private JTextArea textArea_movecard;
+    private JTextArea textArea_addcard;
+    private JTextArea textArea_addmember;
+    private JPanel Calcel_Project;
+    private JTextArea textArea_cancelproject;
+    private JButton GOButton_cancelproject;
+    private JButton INDIETROButton;
     private String projectname;
     private String username;
     private Chat chatThread;
@@ -55,6 +63,14 @@ public class MenuGui {
         setallfalse();
         initialize();
         chatbox.setEditable(false);
+        textArea_cardhistory.setEditable(false);
+        textArea_showcard.setEditable(false);
+        textArea_listmember.setEditable(false);
+        textArea_showcards.setEditable(false);
+        textArea_movecard.setEditable(false);
+        textArea_addcard.setEditable(false);
+        textArea_addmember.setEditable(false);
+        textArea_cancelproject.setEditable(false);
         try{
             String chatAddress = clientManager.get_chat_multicast(projectname);
             if(chatAddress.startsWith("SUCCESS ")){
@@ -71,8 +87,6 @@ public class MenuGui {
         }
         menu.setLocationRelativeTo(null);
         menu.setVisible(true);
-        //addmember_panel.setVisible(true);
-
     }
 
     public void setallfalse(){
@@ -85,9 +99,32 @@ public class MenuGui {
         cardhistory.setVisible(false);
     }
 
+
     private void initialize() {
         menu.setContentPane(menu_panel);
-        menu.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //menu.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        menu.addWindowListener(new WindowAdapter() {
+
+            @Override
+
+            public void windowClosing(WindowEvent e) {
+                try {
+                    clientManager.close();
+                } catch (RemoteException remoteException) {
+                    remoteException.printStackTrace();
+                }
+                if(chatThread != null){
+                    chatThread.close();
+                }
+                try {
+                    clientManager.logout(username);
+                } catch (IOException exception) {
+                    exception.printStackTrace();
+                }
+                System.exit(0);
+            }
+
+        });
         menu.pack();
         projectMenùLabel.setText(projectname);
         GOButton_addmember.addActionListener(new ActionListener() {
@@ -103,10 +140,10 @@ public class MenuGui {
                     String esito = clientManager.addmember(projectname,username);
                     if(esito.startsWith("SUCCESS")){
                         //aggiunta del membro andata buon fine, faccio il login
-                        JOptionPane.showMessageDialog(null, "Membro aggiunto correttamente al progetto");
+                        textArea_addmember.append(esito+"\n");
                     }
                     else{
-                        JOptionPane.showMessageDialog(null, "Aggiunta del membro non andata abuon fine: " + esito , "Error Message" ,JOptionPane.ERROR_MESSAGE);
+                        textArea_addmember.append("ERRORE:" + esito+"\n");
                     }
                 } catch (IOException ioException) {
                     JOptionPane.showMessageDialog(null, "Server disconnesso!", "Error Message", JOptionPane.ERROR_MESSAGE);
@@ -130,10 +167,10 @@ public class MenuGui {
                     String esito = clientManager.addCard(projectname,cardname,descrizione);
                     if(esito.startsWith("SUCCESS")){
                         //aggiunta della carta andata buon fine, faccio il login
-                        JOptionPane.showMessageDialog(null, "Carta aggiunta correttamente al progetto");
+                        textArea_addcard.append(esito+"\n");
                     }
                     else{
-                        JOptionPane.showMessageDialog(null, "Aggiunta della carta non andata abuon fine: " + esito , "Error Message" ,JOptionPane.ERROR_MESSAGE);
+                        textArea_addcard.append("ERRORE:" + esito+"\n");
                     }
                 } catch (IOException ioException) {
                     JOptionPane.showMessageDialog(null, "Server disconnesso!", "Error Message", JOptionPane.ERROR_MESSAGE);
@@ -157,10 +194,10 @@ public class MenuGui {
                     String esito = clientManager.moveCard(projectname,cardname,listapartenza,listadestinazione);
                     if(esito.startsWith("SUCCESS")){
                         //carta spostata con successo
-                        JOptionPane.showMessageDialog(null, "Carta spostata con successo");
+                        textArea_movecard.append(esito+"\n");
                     }
                     else{
-                        JOptionPane.showMessageDialog(null, "Carta spostata con successo: " + esito , "Error Message" ,JOptionPane.ERROR_MESSAGE);
+                        textArea_movecard.append("ERRORE:" + esito+"\n");
                     }
                 } catch (IOException ioException) {
                     JOptionPane.showMessageDialog(null, "Server disconnesso!", "Error Message", JOptionPane.ERROR_MESSAGE);
@@ -181,10 +218,10 @@ public class MenuGui {
                     String esito = clientManager.showcards(projectname);
                     if(esito.startsWith("SUCCESS")){
                         //lista ricevuta con successo
-                        JOptionPane.showMessageDialog(null, "Lista delle carte: " + esito);
+                        textArea_showcards.append(esito+"\n");
                     }
                     else{
-                        JOptionPane.showMessageDialog(null, "Errore: " + esito , "Error Message" ,JOptionPane.ERROR_MESSAGE);
+                        textArea_showcards.append("ERRORE:" + esito+"\n");
                     }
                 } catch (IOException ioException) {
                     JOptionPane.showMessageDialog(null, "Server disconnesso!", "Error Message", JOptionPane.ERROR_MESSAGE);
@@ -206,10 +243,10 @@ public class MenuGui {
                     String esito = clientManager.showcard(projectname,cardname);
                     if(esito.startsWith("SUCCESS")){
                         //carta ricevuta con successo
-                        JOptionPane.showMessageDialog(null, "Carta: " + esito);
+                        textArea_showcard.append(esito+"\n");
                     }
                     else{
-                        JOptionPane.showMessageDialog(null, "Errore: " + esito , "Error Message" ,JOptionPane.ERROR_MESSAGE);
+                        textArea_showcard.append("ERRORE" + esito+"\n");
                     }
                 } catch (IOException ioException) {
                     JOptionPane.showMessageDialog(null, "Server disconnesso!", "Error Message", JOptionPane.ERROR_MESSAGE);
@@ -230,10 +267,10 @@ public class MenuGui {
                     String esito = clientManager.showmembers(projectname);
                     if(esito.startsWith("SUCCESS")){
                         //lista membri ricevuta con successo
-                        JOptionPane.showMessageDialog(null, "Lista membri: " + esito);
+                        textArea_listmember.append(esito+"\n");
                     }
                     else{
-                        JOptionPane.showMessageDialog(null, "Errore: " + esito , "Error Message" ,JOptionPane.ERROR_MESSAGE);
+                        textArea_listmember.append("ERRORE" + esito+"\n");
                     }
                 } catch (IOException ioException) {
                     JOptionPane.showMessageDialog(null, "Server disconnesso!", "Error Message", JOptionPane.ERROR_MESSAGE);
@@ -255,10 +292,10 @@ public class MenuGui {
                     String esito = clientManager.getCardHistory(projectname,cardname);
                     if(esito.startsWith("SUCCESS")){
                         //lista movimenti della card ricevuta con successo
-                        JOptionPane.showMessageDialog(null, "Lista movimenti carta: " + esito);
+                        textArea_cardhistory.append(esito+"\n");
                     }
                     else{
-                        JOptionPane.showMessageDialog(null, "Errore: " + esito , "Error Message" ,JOptionPane.ERROR_MESSAGE);
+                        textArea_cardhistory.append("ERRORE" + esito+"\n");
                     }
                 } catch (IOException ioException) {
                     JOptionPane.showMessageDialog(null, "Server disconnesso!", "Error Message", JOptionPane.ERROR_MESSAGE);
@@ -296,6 +333,52 @@ public class MenuGui {
                 } catch (IOException ioException) {
                     JOptionPane.showMessageDialog(null, "Server disconnesso!", "Error Message", JOptionPane.ERROR_MESSAGE);
                     System.exit(1);
+                }
+                menu.setVisible(false);
+            }
+        });
+
+        messagge_field.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                super.keyPressed(e);
+                int key=e.getKeyCode();
+                if(key==KeyEvent.VK_ENTER){
+                    sendButton.doClick();
+                }
+            }
+        });
+
+        GOButton_cancelproject.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(projectname.isEmpty()){
+                    JOptionPane.showMessageDialog(null, "projectname o username non validi! Riprova", "Error Message",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                try{
+                    String esito = clientManager.cancelProject(projectname);
+                    if(esito.startsWith("SUCCESS")){
+                        //lprogetto cancellato correttamente
+                        textArea_cancelproject.append(esito+"\n");
+                    }
+                    else{
+                        textArea_cancelproject.append("ERRORE" + esito+"\n");
+                    }
+                } catch (IOException ioException) {
+                    JOptionPane.showMessageDialog(null, "Server disconnesso!", "Error Message", JOptionPane.ERROR_MESSAGE);
+                    System.exit(1);
+                }
+            }
+        });
+
+        INDIETROButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                HomeGui home_gui = new HomeGui(clientManager,mainFrame,username);
+                if(chatThread != null){
+                    chatThread.close();
                 }
                 menu.setVisible(false);
             }

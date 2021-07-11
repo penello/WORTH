@@ -1,10 +1,7 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +33,22 @@ public class Main_GUI {
 
     private void initialize() {
         mainFrame.setContentPane(panel_main);
-        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        mainFrame.addWindowListener(new WindowAdapter() {
+
+            @Override
+
+            public void windowClosing(WindowEvent e) {
+                try {
+                    clientManager.close();
+                } catch (RemoteException remoteException) {
+                    remoteException.printStackTrace();
+                }
+                System.exit(0);
+            }
+        });
+
         mainFrame.pack();
 
         LOGINButton.addActionListener(new ActionListener() {
@@ -78,6 +90,17 @@ public class Main_GUI {
                 } catch (RemoteException remoteException) {
                     JOptionPane.showMessageDialog(null, "Server disconnesso!", "Error Message", JOptionPane.ERROR_MESSAGE);
                     System.exit(1);
+                }
+            }
+        });
+
+        passwordField1.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                super.keyPressed(e);
+                int key=e.getKeyCode();
+                if(key==KeyEvent.VK_ENTER){
+                    LOGINButton.doClick();
                 }
             }
         });

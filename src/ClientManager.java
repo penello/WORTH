@@ -123,9 +123,9 @@ public class ClientManager {
             server.UnregisterForCallback(callbackObj);
     }
 
-    public String listProjects(String projectname) throws IOException {
-        if(projectname == null) throw new NullPointerException();
-        send_message("listproject");
+    public String listProjects(String username) throws IOException {
+        if(username == null) throw new NullPointerException();
+        send_message("listproject " + username);
         String risposta = read_message();
         return risposta;
     }
@@ -194,7 +194,6 @@ public class ClientManager {
             send_message("cancelproject " + projectName);
             String risposta = read_message();
             return risposta;
-
     }
 
     public String listUsersFunction(){
@@ -206,7 +205,7 @@ public class ClientManager {
         result = result + str.toString();
         return result;
     }
-    private String listOnlineUsersFunction() {
+    public String listOnlineUsersFunction() {
         String result = "Online users: ";
         AtomicReference<String> str = new AtomicReference<>(" ");
         utenti_registrati.forEach((k, v) -> {

@@ -1,7 +1,10 @@
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -12,6 +15,10 @@ public class HomeGui {
     private JPanel home_panel;
     private JLabel Projectimg;
     private JButton logOutButton;
+    private JButton listOnlineUsersButton;
+    private JButton listRegisterUsersButton;
+    private JTextArea textArea_homegui;
+    private JButton listProjectButton;
     private ClientManager clientManager;
     private JFrame mainFrame;
     private JFrame home;
@@ -24,13 +31,33 @@ public class HomeGui {
         this.mainFrame = start;
         home = new JFrame("WORTH home");
         initialize();
+        textArea_homegui.setEditable(false);
         home.setLocationRelativeTo(null);
         home.setVisible(true);
     }
 
     private void initialize() {
         home.setContentPane(home_panel);
-        home.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //home.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        home.addWindowListener(new WindowAdapter() {
+
+            @Override
+
+            public void windowClosing(WindowEvent e) {
+                try {
+                    clientManager.close();
+                } catch (RemoteException remoteException) {
+                    remoteException.printStackTrace();
+                }
+                try {
+                    clientManager.logout(username);
+                } catch (IOException exception) {
+                    exception.printStackTrace();
+                }
+                System.exit(0);
+            }
+        });
         home.pack();
         createProjectButton.addActionListener(new ActionListener() {
             @Override
@@ -83,7 +110,7 @@ public class HomeGui {
                     home.setVisible(false);
                 }
                 else{
-                    JOptionPane.showMessageDialog(null,"Accesso negato, non sei membro del progetto " + projectname);
+                    textArea_homegui.append("Impossibile accedere al progetto\n");
                 }
             }
         });
@@ -99,6 +126,35 @@ public class HomeGui {
                     System.exit(1);
                 }
                 home.setVisible(false);
+            }
+        });
+
+        listOnlineUsersButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String esito = clientManager.listOnlineUsersFunction();
+                textArea_homegui.append(esito+"\n");
+            }
+        });
+
+        listRegisterUsersButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String esito = clientManager.listUsersFunction();
+                textArea_homegui.append(esito + "\n");
+            }
+        });
+
+        listProjectButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String esito = clientManager.listProjects(username);
+                    textArea_homegui.append(esito +"\n");
+                } catch (IOException exception) {
+                    JOptionPane.showMessageDialog(null, "Server disconnesso!", "Error Message", JOptionPane.ERROR_MESSAGE);
+                    System.exit(1);
+                }
             }
         });
     }
