@@ -117,8 +117,6 @@ public class Op_server implements Runnable{
         String ret = null;
         if(args.length!=3) {
             ret = "comandi non inseriti correttamente";
-            System.out.println(args.length);
-            System.out.flush();
         }
         else if(this.username != null) ret = access_denided;
         else {
@@ -208,6 +206,7 @@ public class Op_server implements Runnable{
                 LinkedList<String> membri = obj.show_members(projectname, this.username);
                 Iterator<String> iterator = membri.iterator();
                 while (iterator.hasNext()) {
+                    ret = ": lista dei membri: ";
                     ret = ret + iterator.next();
                 }
             }

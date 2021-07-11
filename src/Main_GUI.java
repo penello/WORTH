@@ -21,6 +21,8 @@ public class Main_GUI {
     private JLabel Passwordlogo;
     private ClientManager clientManager;
     private JFrame mainFrame;
+    private String username;
+    private String password;
 
     //public Main_GUI(JFrame frame){
     public Main_GUI(ClientManager clientManager) {
@@ -40,20 +42,12 @@ public class Main_GUI {
         LOGINButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String username = Usernamefield.getText().trim();
-                passwordField1.setEchoChar('*');
-                String password = passwordField1.getText().trim();
-                //do something
-                if(username.isEmpty() || password.isEmpty()){
-                    JOptionPane.showMessageDialog(null, "Utente o password non validi! Riprova", "Error Message",
-                            JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
+                get_text();
                 try{
                     String esito = clientManager.login(username,password);
                     if(esito.startsWith("SUCCESS")){
                         //login eseguito correttamente
-                        HomeGui homegui = new HomeGui(clientManager, mainFrame);
+                        HomeGui homegui = new HomeGui(clientManager, mainFrame,username);
                         mainFrame.setVisible(false);
                     }
                     else {
@@ -71,16 +65,7 @@ public class Main_GUI {
         SIGNINButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String username = Usernamefield.getText().trim();
-                passwordField1.setEchoChar('*');
-                String password = passwordField1.getText().trim();
-
-                //do something
-                if(username.isEmpty() || password.isEmpty()){
-                    JOptionPane.showMessageDialog(null, "Utente o password non validi! Riprova", "Error Message",
-                            JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
+                get_text();
                 try{
                     String esito = clientManager.register(username,password);
                     if(esito.startsWith("SUCCESS")){
@@ -96,6 +81,16 @@ public class Main_GUI {
                 }
             }
         });
+    }
+
+    private void get_text(){
+        username = Usernamefield.getText().trim();
+        password = passwordField1.getText().trim();
+        if(username.isEmpty() || password.isEmpty()){
+            JOptionPane.showMessageDialog(null, "Utente o password non validi! Riprova", "Error Message",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
     }
 
     private void createUIComponents() {

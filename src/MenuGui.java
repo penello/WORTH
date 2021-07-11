@@ -18,21 +18,14 @@ public class MenuGui {
     private JPanel showcards_panel;
     private JPanel showcard_panel;
     private JPanel listmember_panel;
-    private JTextField projectname_addmember_field;
     private JTextField username_addmember_field;
-    private JTextField projectname_addcard_field;
     private JTextField cardname_addcard_field;
     private JTextField descrizione_addcard_field;
-    private JTextField projectname_movecard_field;
     private JTextField cardname_movecard_field;
     private JTextField listapartenza_movecard_field;
     private JTextField listadestinazione_movecard_field;
-    private JTextField projectname_showcards_field;
-    private JTextField projectname_showcard_field;
     private JTextField cardname_showcard_field;
-    private JTextField projectname_listmember_field;
     private JPanel cardhistory;
-    private JTextField projectname_cardhistory_field;
     private JTextField cardname_cardhistory_field;
     private JButton GOButton_addmember;
     private JButton GOButton_addcard;
@@ -41,9 +34,12 @@ public class MenuGui {
     private JButton GOButton_showcard;
     private JButton GOButton_listmember;
     private JButton GOButton_history;
+    private String projectname;
 
 
-    public MenuGui(ClientManager clientmanager, JFrame start){
+
+    public MenuGui(ClientManager clientmanager, JFrame start,String projectname){
+        this.projectname = projectname;
         this.clientManager = clientmanager;
         this.mainFrame = start;
         menu = new JFrame("project menù");
@@ -56,6 +52,7 @@ public class MenuGui {
         comboBox1.addItem("cardhistory");
         setallfalse();
         initialize();
+        menu.setLocationRelativeTo(null);
         menu.setVisible(true);
         addmember_panel.setVisible(true);
     }
@@ -109,7 +106,6 @@ public class MenuGui {
         GOButton_addmember.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String projectname = projectname_addmember_field.getText().trim();
                 String username = username_addmember_field.getText().trim();
                 if(projectname.isEmpty() || username.isEmpty()){
                     JOptionPane.showMessageDialog(null, "projectname o username non validi! Riprova", "Error Message",
@@ -135,7 +131,6 @@ public class MenuGui {
         GOButton_addcard.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String projectname = projectname_addcard_field.getText().trim();
                 String cardname = cardname_addcard_field.getText().trim();
                 String descrizione = descrizione_addcard_field.getText().trim();
                 descrizione = descrizione.replace(" ","");
@@ -163,7 +158,6 @@ public class MenuGui {
         GOButton_movecard.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String projectname = projectname_movecard_field.getText().trim();
                 String cardname = cardname_movecard_field.getText().trim();
                 String listapartenza = listapartenza_movecard_field.getText().trim();
                 String listadestinazione = listadestinazione_movecard_field.getText().trim();
@@ -191,7 +185,6 @@ public class MenuGui {
         GOButton_showcards.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String projectname = projectname_showcards_field.getText().trim();
                 if(projectname.isEmpty()){
                     JOptionPane.showMessageDialog(null, "projectname o username non validi! Riprova", "Error Message",
                             JOptionPane.ERROR_MESSAGE);
@@ -216,7 +209,6 @@ public class MenuGui {
         GOButton_showcard.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String projectname = projectname_showcard_field.getText().trim();
                 String cardname = cardname_showcard_field.getText().trim();
                 if(projectname.isEmpty() || cardname.isEmpty()){
                     JOptionPane.showMessageDialog(null, "projectname o username non validi! Riprova", "Error Message",
@@ -242,7 +234,6 @@ public class MenuGui {
         GOButton_listmember.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String projectname = projectname_listmember_field.getText().trim();
                 if(projectname.isEmpty()){
                     JOptionPane.showMessageDialog(null, "projectname o username non validi! Riprova", "Error Message",
                             JOptionPane.ERROR_MESSAGE);
@@ -267,7 +258,6 @@ public class MenuGui {
         GOButton_history.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String projectname = projectname_cardhistory_field.getText().trim();
                 String cardname = cardname_cardhistory_field.getText().trim();
                 if(projectname.isEmpty() || cardname.isEmpty()){
                     JOptionPane.showMessageDialog(null, "projectname o username non validi! Riprova", "Error Message",

@@ -169,7 +169,7 @@ public class ClientManager {
 
     public String moveCard(String projectName,String cardName,String listaPartenza,String listaDestinazione) throws IOException {
         if(projectName == null || cardName == null || listaPartenza == null || listaDestinazione == null) throw new NullPointerException();
-        send_message("movecard " + projectName + " " + cardName + " " + listaDestinazione + " " + listaDestinazione);
+        send_message("movecard " + projectName + " " + cardName + " " + listaPartenza + " " + listaDestinazione);
         String risposta = read_message();
         return risposta;
     }

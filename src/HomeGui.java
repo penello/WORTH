@@ -8,16 +8,21 @@ public class HomeGui {
     private JButton createProjectButton;
     private JButton projectMenùButton;
     private JPanel home_panel;
+    private JLabel Projectimg;
+    private JButton logOutButton;
     private ClientManager clientManager;
     private JFrame mainFrame;
     private JFrame home;
+    private String username;
 
 
-    public HomeGui(ClientManager clientManager, JFrame start){
+    public HomeGui(ClientManager clientManager, JFrame start,String username){
+        this.username = username;
         this.clientManager = clientManager;
         this.mainFrame = start;
         home = new JFrame("WORTH home");
         initialize();
+        home.setLocationRelativeTo(null);
         home.setVisible(true);
     }
 
@@ -62,9 +67,27 @@ public class HomeGui {
                     return;
                 }
                 //apro una vuova gui con il project menù
-                MenuGui menugui = new MenuGui(clientManager,mainFrame);
+                MenuGui menugui = new MenuGui(clientManager,mainFrame,projectname);
                 home.setVisible(false);
             }
         });
+
+        logOutButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Main_GUI main_gui = new Main_GUI(clientManager);
+                try {
+                    clientManager.logout(username);
+                } catch (IOException ioException) {
+                    JOptionPane.showMessageDialog(null, "Server disconnesso!", "Error Message", JOptionPane.ERROR_MESSAGE);
+                    System.exit(1);
+                }
+                home.setVisible(false);
+            }
+        });
+    }
+
+    private void createUIComponents() {
+        Projectimg = new JLabel(new ImageIcon("project-planning.png"));
     }
 }
