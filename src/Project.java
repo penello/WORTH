@@ -73,7 +73,7 @@ public class Project {
         Random rand = new Random();
         for(i = 0; i<3; i++){
             Integer x = rand.nextInt(256);
-            r = "."+ x.toString();
+            r = r+"."+ x.toString();
         }
         return r;
     }

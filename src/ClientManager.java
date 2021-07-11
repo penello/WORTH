@@ -97,6 +97,14 @@ public class ClientManager {
         return risposta;
     }
 
+    public String get_chat_multicast(String projectname)throws IOException{
+        if(projectname == null) throw new NullPointerException();
+        send_message("getchat " + projectname);
+        String risposta = read_message();
+        if(!risposta.isEmpty()) return risposta;
+        else return "Errore nel reperimento dell'ip muticast";
+    }
+
     public String logout(String username) throws IOException{
         if(username == null) throw new NullPointerException();
         send_message("logout " + username);

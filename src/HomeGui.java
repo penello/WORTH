@@ -2,6 +2,8 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class HomeGui {
     private JTextField Projectnamefield;
@@ -66,9 +68,23 @@ public class HomeGui {
                             JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                //apro una vuova gui con il project menù
-                MenuGui menugui = new MenuGui(clientManager,mainFrame,projectname);
-                home.setVisible(false);
+                boolean isContained= false;
+                try {
+                    String [] users = clientManager.showmembers(projectname).replace("SUCCESS ","").split("\\|");
+                    ArrayList<String> list = new ArrayList<>(Arrays.asList(users));
+                    isContained = list.contains(username);
+                } catch (IOException ioException) {
+                    JOptionPane.showMessageDialog(null, "Server disconnesso!", "Error Message", JOptionPane.ERROR_MESSAGE);
+                    System.exit(1);
+                }
+                if(isContained){
+                    //apro una vuova gui con il project menù
+                    MenuGui menugui = new MenuGui(clientManager,mainFrame,projectname,username);
+                    home.setVisible(false);
+                }
+                else{
+                    JOptionPane.showMessageDialog(null,"Accesso negato, non sei membro del progetto " + projectname);
+                }
             }
         });
 

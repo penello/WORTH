@@ -86,6 +86,9 @@ public class Op_server implements Runnable{
                         case ("cancelproject"):
                             cancelproject(args);
                             break;
+                        case ("getchat"):
+                            getchat(args);
+                            break;
                         default:
                             sendanswer("Inserire un comando valido");
                     }
@@ -131,6 +134,26 @@ public class Op_server implements Runnable{
                 ret = "SUCCESS " + obj.getUsers();
             } else {
                 ret = "Username o Password errati";
+            }
+        }
+        sendanswer(ret);
+    }
+
+    public void getchat(String[] args){
+        String ret = null;
+        if(args.length !=2){
+            ret = "comandi non inseriti correttamente";
+        }
+        else if(this.username == null) ret = access_denided;
+        else {
+            String projectname = args[1];
+            if (!Singleton_db_progetti.getInstanceProgetti().get_project(projectname).containsmember(this.username))
+                ret = access_denided;
+            else {
+                Hash_project obj = Singleton_db_progetti.getInstanceProgetti();
+                Project proj = obj.get_project(projectname);
+                //TODO: porta Configurabile
+                ret = "SUCCESS "+proj.getIp_multicast() +":"+"4400";
             }
         }
         sendanswer(ret);
@@ -205,9 +228,10 @@ public class Op_server implements Runnable{
                 Hash_project obj = Singleton_db_progetti.getInstanceProgetti();
                 LinkedList<String> membri = obj.show_members(projectname, this.username);
                 Iterator<String> iterator = membri.iterator();
+                ret = "";
                 while (iterator.hasNext()) {
-                    ret = ": lista dei membri: ";
-                    ret = ret + iterator.next();
+
+                    ret = ret + iterator.next()+"|";
                 }
             }
         }

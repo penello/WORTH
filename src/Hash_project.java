@@ -47,9 +47,10 @@ public class Hash_project implements Serializable {
     public String add_projectmember(String projectname, String username){
         Project proj = progetti.get(projectname);
         if(proj == null) return "Il progetto "+projectname+" non esiste";
-        else if(!proj.add_member(username)) return "l'utente "+username+" è già un membro del progetto";
         Hash_users obj = Singleton_db_utenti.getInstanceUtenti();
         User utente = obj.get_user(username);
+        if(utente == null) return "L'utente non esiste";
+        else if(!proj.add_member(username)) return "l'utente "+username+" è già un membro del progetto";
         utente.add_project(projectname);
         return "SUCCESS ";
     }

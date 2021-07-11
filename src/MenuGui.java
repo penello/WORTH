@@ -11,7 +11,6 @@ public class MenuGui {
     private JFrame mainFrame;
     private JFrame menu;
     private JPanel menu_panel;
-    private JComboBox comboBox1;
     private JPanel addmember_panel;
     private JPanel addcard_panel;
     private JPanel movecard_panel;
@@ -34,27 +33,46 @@ public class MenuGui {
     private JButton GOButton_showcard;
     private JButton GOButton_listmember;
     private JButton GOButton_history;
+    private JTabbedPane tabbedPane1;
+    private JLabel projectMenùLabel;
+    private JButton logOutButton;
+    private JPanel Chat;
+    private JTextArea chatbox;
+    private JTextField messagge_field;
+    private JButton sendButton;
     private String projectname;
+    private String username;
+    private Chat chatThread;
 
 
 
-    public MenuGui(ClientManager clientmanager, JFrame start,String projectname){
+    public MenuGui(ClientManager clientmanager, JFrame start,String projectname, String username){
         this.projectname = projectname;
+        this.username = username;
         this.clientManager = clientmanager;
         this.mainFrame = start;
         menu = new JFrame("project menù");
-        comboBox1.addItem("addmember");
-        comboBox1.addItem("addcard");
-        comboBox1.addItem("movecard");
-        comboBox1.addItem("showcards");
-        comboBox1.addItem("showcard");
-        comboBox1.addItem("listmember");
-        comboBox1.addItem("cardhistory");
         setallfalse();
         initialize();
+        chatbox.setEditable(false);
+        try{
+            String chatAddress = clientManager.get_chat_multicast(projectname);
+            if(chatAddress.startsWith("SUCCESS ")){
+                chatAddress = chatAddress.replace("SUCCESS ","");
+                chatThread = new Chat(chatAddress,chatbox,username);
+                chatThread.start();
+            }
+            else{
+                chatbox.append(chatAddress);
+            }
+        }
+        catch(IOException e){
+            chatbox.append("Impossibile Collegarsi alla chat");
+        }
         menu.setLocationRelativeTo(null);
         menu.setVisible(true);
-        addmember_panel.setVisible(true);
+        //addmember_panel.setVisible(true);
+
     }
 
     public void setallfalse(){
@@ -71,38 +89,7 @@ public class MenuGui {
         menu.setContentPane(menu_panel);
         menu.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         menu.pack();
-        comboBox1.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                setallfalse();
-                switch ((String) comboBox1.getSelectedItem()){
-                    case ("addmember") :
-                        addmember_panel.setVisible(true);
-                        break;
-                    case ("addcard") :
-                        addcard_panel.setVisible(true);
-                        break;
-                    case ("movecard") :
-                        movecard_panel.setVisible(true);
-                        break;
-                    case ("showcards") :
-                        showcards_panel.setVisible(true);
-                        break;
-                    case ("showcard") :
-                        showcard_panel.setVisible(true);
-                        break;
-                    case ("listmember") :
-                        listmember_panel.setVisible(true);
-                        break;
-                    case ("cardhistory") :
-                        cardhistory.setVisible(true);
-                        break;
-                }
-                menu_panel.updateUI();
-                menu_panel.revalidate();
-            }
-        });
-
+        projectMenùLabel.setText(projectname);
         GOButton_addmember.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -280,5 +267,40 @@ public class MenuGui {
             }
         });
 
+        sendButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(!messagge_field.getText().trim().isEmpty()){
+                    try{
+                        chatThread.sendMessage(messagge_field.getText().trim());
+                        messagge_field.setText("");
+                    }
+                    catch (IOException exception){
+                        chatbox.append("Impossibile Mandare il messaggio\n");
+                    }
+
+                }
+
+            }
+        });
+
+        logOutButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Main_GUI main_gui = new Main_GUI(clientManager);
+                try {
+                    if(chatThread != null){
+                        chatThread.close();
+                    }
+                    clientManager.logout(username);
+                } catch (IOException ioException) {
+                    JOptionPane.showMessageDialog(null, "Server disconnesso!", "Error Message", JOptionPane.ERROR_MESSAGE);
+                    System.exit(1);
+                }
+                menu.setVisible(false);
+            }
+        });
+
     }
+
 }
