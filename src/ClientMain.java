@@ -1,18 +1,14 @@
 import javax.swing.*;
 import java.io.*;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class ClientMain {
 
+    /**
+     * metodo usato per caricare i parametri di avvio del client, quali la porta tcp, ip del server e le porte rmi
+     * @param path percorso del file di configurazione
+     * @return
+     */
     private static Properties load_properties(String path){
         Properties properties = new Properties();
 
@@ -38,10 +34,20 @@ public class ClientMain {
         return properties;
     }
 
+    /**
+     * main del client
+     * @param args
+     */
     public static void main(String[] args){
         Properties properties = load_properties("client.ini");
+
+        String server_address = properties.getProperty("server_ip");
+        int tcp = Integer.parseInt(properties.getProperty("porta_tcp"));
+        int rmi_r = Integer.parseInt(properties.getProperty("porta_rmi"));
+        int rmi_c = Integer.parseInt(properties.getProperty("porta_rmicallback"));
+
         //creazione del clientmanager per la gestione di tutte le comunicazioni con il server
-        ClientManager CM = new ClientManager();
+        ClientManager CM = new ClientManager(server_address,tcp,rmi_r,rmi_c);
         try {
             //creazione interfaccia grafica
             Main_GUI log = new Main_GUI(CM);
@@ -49,9 +55,5 @@ public class ClientMain {
             // caso in cui il server sia offline
             JOptionPane.showMessageDialog(null, "Server offline!");
         }
-
     }
-
-
-
 }

@@ -1,4 +1,3 @@
-import javax.imageio.IIOException;
 import java.io.*;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -8,29 +7,38 @@ public class CbClientImplementation extends UnicastRemoteObject implements CbCli
 
     private ConcurrentHashMap<String,User> utenti;
 
+    /**
+     *
+     * @param utenti struttura dati contenente gli utenti
+     * @throws RemoteException se fallisce l'esportazione dell'oggetto
+     */
     public CbClientImplementation(ConcurrentHashMap<String,User> utenti) throws RemoteException {
         super( );
         this.utenti = utenti;
     }
 
-    /* metodo che può essere richiamato dal servente */
-    public void notifyMe(User utente) throws RemoteException {
-        //se esiste vuol dire che la chiamata è stata fatta per un cambio di stato dell'utente
-        if(utenti.putIfAbsent(utente.getUsername(),utente) != null){
-            User tmp = utenti.get(utente.getUsername());
-            if(utente.getStato().equals("online")){
-                tmp.vai_on();
-            }
-            else tmp.vai_off();
-        }
+    /**
+     * metodo chiamato dal server per notificare l'utente di una modifica
+     * @param utente
+     */
+    public void notifyMe(User utente) {
+        utenti.remove(utente.getUsername());
+        utenti.put(utente.getUsername(),utente);
     }
 
+    /**
+     * metodo chiamato dal server quando un utente effettua il login, viene passata la struttura dati contenente le informazioni degli utenti
+     * @param utenti
+     * @throws IOException
+     * @throws ClassNotFoundException Class of a serialized object cannot be found
+     */
     public void notifyUtenti(byte[] utenti) throws IOException, ClassNotFoundException {
         ByteArrayInputStream bytein = new ByteArrayInputStream(utenti);
         ObjectInputStream instream = new ObjectInputStream(bytein);
         ConcurrentHashMap<String,User> tmp = (ConcurrentHashMap<String,User>) instream.readObject();
         this.utenti = tmp;
     }
+
 
     public ConcurrentHashMap<String,User> gethashmap(){return this.utenti;}
 }

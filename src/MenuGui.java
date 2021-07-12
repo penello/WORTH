@@ -3,6 +3,7 @@ import java.awt.event.*;
 import java.io.IOException;
 import java.rmi.RemoteException;
 
+
 public class MenuGui {
     private ClientManager clientManager;
     private JFrame mainFrame;
@@ -73,7 +74,7 @@ public class MenuGui {
         textArea_cancelproject.setEditable(false);
         try{
             String chatAddress = clientManager.get_chat_multicast(projectname);
-            if(chatAddress.startsWith("SUCCESS ")){
+            if(chatAddress.startsWith("SUCCESS")){
                 chatAddress = chatAddress.replace("SUCCESS ","");
                 chatThread = new Chat(chatAddress,chatbox,username);
                 chatThread.start();
@@ -215,10 +216,14 @@ public class MenuGui {
                     return;
                 }
                 try{
+                    textArea_showcards.setText("");
                     String esito = clientManager.showcards(projectname);
                     if(esito.startsWith("SUCCESS")){
-                        //lista ricevuta con successo
-                        textArea_showcards.append(esito+"\n");
+                        String [] cards = esito.replace("SUCCESS ","").split("\\|");
+                        for(int i=0; i<cards.length; i++){
+                            textArea_showcards.append(cards[i]+"\n");
+                        }
+
                     }
                     else{
                         textArea_showcards.append("ERRORE:" + esito+"\n");
@@ -235,13 +240,14 @@ public class MenuGui {
             public void actionPerformed(ActionEvent e) {
                 String cardname = cardname_showcard_field.getText().trim();
                 if(projectname.isEmpty() || cardname.isEmpty()){
-                    JOptionPane.showMessageDialog(null, "projectname o username non validi! Riprova", "Error Message",
+                    JOptionPane.showMessageDialog(null, "Cardname non valido! Riprova", "Error Message",
                             JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 try{
                     String esito = clientManager.showcard(projectname,cardname);
                     if(esito.startsWith("SUCCESS")){
+                        esito.replace("SUCCESS ","");
                         //carta ricevuta con successo
                         textArea_showcard.append(esito+"\n");
                     }
@@ -265,9 +271,12 @@ public class MenuGui {
                 }
                 try{
                     String esito = clientManager.showmembers(projectname);
+                    textArea_listmember.setText("");
                     if(esito.startsWith("SUCCESS")){
-                        //lista membri ricevuta con successo
-                        textArea_listmember.append(esito+"\n");
+                        String [] members = esito.replace("SUCCESS ","").split("\\|");
+                        for(int i=0; i<members.length; i++){
+                            textArea_listmember.append(members[i]+"\n");
+                        }
                     }
                     else{
                         textArea_listmember.append("ERRORE" + esito+"\n");
@@ -290,9 +299,12 @@ public class MenuGui {
                 }
                 try{
                     String esito = clientManager.getCardHistory(projectname,cardname);
+                    textArea_cardhistory.append("History di "+cardname +"\n");
                     if(esito.startsWith("SUCCESS")){
-                        //lista movimenti della card ricevuta con successo
-                        textArea_cardhistory.append(esito+"\n");
+                        String [] histories = esito.replace("SUCCESS ","").split("\\|");
+                        for(int i=0; i<histories.length; i++){
+                            textArea_cardhistory.append("    "+histories[i]+"\n");
+                        }
                     }
                     else{
                         textArea_cardhistory.append("ERRORE" + esito+"\n");

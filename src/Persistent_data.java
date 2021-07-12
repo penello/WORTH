@@ -8,7 +8,9 @@ public class Persistent_data {
 
     private volatile static Persistent_data istanza = null;
 
-
+    /**
+     * costruttore che alla chiamata crea le directory dove salvare i dati se non esistono
+     */
     private Persistent_data() {
         File file = new File(project_folder);
         File file2 = new File(user_folder);
@@ -28,6 +30,10 @@ public class Persistent_data {
         }
     }
 
+    /**
+     *
+     * @return l'istanza della classe
+     */
     public static Persistent_data getInstance(){
         if(istanza == null){
             synchronized (Persistent_data.class){
@@ -40,10 +46,25 @@ public class Persistent_data {
         return istanza;
     }
 
+    /**
+     *
+     * @return la directory degli utenti che contiene i dati persistenti
+     */
     public String getUser_folder(){ return user_folder;}
 
+    /**
+     *
+     * @return la directory dei progetti che contiene i dati persistenti
+     */
     public String getProject_folder(){ return project_folder;}
 
+    /**
+     * metodo per salvare in maniera persistente i dati
+     * @param path
+     * @param obj
+     * @param type
+     * @return il risultato dell'operazione
+     */
     public boolean save(String path, Object obj, Class<?> type){
         try (ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(path));) {
 
@@ -55,7 +76,11 @@ public class Persistent_data {
         return true;
     }
 
-
+    /**
+     * metodo per creare una directory
+     * @param projectname
+     * @return
+     */
     public boolean create_dir(String projectname){
         if(! new File(project_folder).exists()) return false;
         String dir = projectname+"/";

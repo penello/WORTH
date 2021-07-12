@@ -30,6 +30,9 @@ public class Chat extends Thread {
         socket.joinGroup(group);
     }
 
+    /**
+     * metodo eseguito da un thread, usato per la chat multicast
+     */
     public void run() {
         String welcome="Si è unito alla chat del progetto";
         try{
@@ -51,13 +54,17 @@ public class Chat extends Thread {
                 chatBox.append("Errore nella chat multicast\n");
                 close();
             }
-
-            chatBox.setCaretPosition(chatBox.getText().length()); //set Caret position to the  bottom of the JTextArea
+            //set Caret position to the  bottom of the JTextArea
+            chatBox.setCaretPosition(chatBox.getText().length());
         }
 
     }
 
-
+    /**
+     * metodo usato per inviare un messaggio nella chat
+     * @param msg
+     * @throws IOException
+     */
    public void sendMessage(String msg) throws IOException{
         msg = this.user+": "+msg;
         byte[] buffer = msg.getBytes(StandardCharsets.UTF_8);
@@ -65,6 +72,11 @@ public class Chat extends Thread {
         socket.send(packet);
    }
 
+    /**
+     * metodo usato per leggere un messaggio arrivato alla chat
+     * @return
+     * @throws IOException
+     */
    public String readMessage() throws IOException{
         byte[] buffer = new byte[socket.getReceiveBufferSize()];
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
@@ -73,7 +85,9 @@ public class Chat extends Thread {
         return msg;
    }
 
-
+    /**
+     * metodo usato per uscire dalla chat multicast
+     */
     public void close(){
         this.interrupt();
         try{
@@ -84,6 +98,4 @@ public class Chat extends Thread {
         }
         socket.close();
     }
-
-
 }

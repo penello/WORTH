@@ -3,12 +3,9 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.LinkedList;
-import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -20,7 +17,7 @@ public class ServerMain {
 
         Properties properties = load_properties("server.ini");
 
-        //funzione per recuperare lo stato del servizio se ci sono dati salvati
+        //funzione per recuperare i dati salvati se sono presenti
         restoreBackup();
 
         try {
@@ -46,10 +43,9 @@ public class ServerMain {
         //avvio la connessione TCP
         try {
             ServerSocket listeningSocket = new ServerSocket();
-            //il server resta in ascolto sulla porta 4569
-            String s = InetAddress.getLocalHost().getHostAddress();
             int tcpPort = Integer.parseInt(properties.getProperty("porta_tcp"));
-            listeningSocket.bind(new InetSocketAddress(tcpPort));
+            String tcpip = properties.getProperty("ip_tcp");
+            listeningSocket.bind(new InetSocketAddress(InetAddress.getByName(tcpip),tcpPort));
             ThreadPoolExecutor threadPool = (ThreadPoolExecutor) Executors.newCachedThreadPool();
             while(true){
                 //accetto le richieste di connessione da parte degli utenti
@@ -63,7 +59,9 @@ public class ServerMain {
         }
     }
 
-    //funzione per recuperaro lo stato precedente del servizio se ci sono dati salvati presenti
+    /**
+     * metodo per recuperare i dati persistenti se sono presenti
+     */
     private static void restoreBackup() {
         try{
             File recoveryDir = new File(Persistent_data.getInstance().getProject_folder());
@@ -97,7 +95,11 @@ public class ServerMain {
             e.printStackTrace();
         }
     }
-
+    /**
+     * metodo usato per caricare i parametri di avvio del server, quali la porta tcp, ip tcp e le porte rmi
+     * @param path percorso del file di configurazione
+     * @return
+     */
     private static Properties load_properties(String path){
         Properties properties = new Properties();
 
@@ -105,6 +107,7 @@ public class ServerMain {
         properties.setProperty("porta_tcp", "4300");
         properties.setProperty("porta_rmicallback", "4202");
         properties.setProperty("porta_multicast", "4400");
+        properties.setProperty("ip_tcp","127.0.0.1");
 
         try(FileReader fileReader = new FileReader(path)){
             properties.load(fileReader);

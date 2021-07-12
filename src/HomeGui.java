@@ -19,6 +19,7 @@ public class HomeGui {
     private JButton listRegisterUsersButton;
     private JTextArea textArea_homegui;
     private JButton listProjectButton;
+    private JLabel username_lable;
     private ClientManager clientManager;
     private JFrame mainFrame;
     private JFrame home;
@@ -59,6 +60,7 @@ public class HomeGui {
             }
         });
         home.pack();
+        username_lable.setText(username);
         createProjectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -70,7 +72,7 @@ public class HomeGui {
                 }
                 try{
                     String esito = clientManager.createproject(projectname);
-                    if(esito.startsWith("SUCCESS ")){
+                    if(esito.startsWith("SUCCESS")){
                         //progetto creato correttamente
                         JOptionPane.showMessageDialog(null, esito);
                         projectMenùButton.doClick();

@@ -7,7 +7,7 @@ import java.rmi.server.UnicastRemoteObject;
 
 public class Registration extends UnicastRemoteObject implements Registration_interface {
 
-    private int porta_rmi = 4201;
+    private int porta_rmi;
     private CbServerImplementation server;
 
     public Registration(CbServerImplementation server, int port) throws RemoteException {
@@ -18,7 +18,6 @@ public class Registration extends UnicastRemoteObject implements Registration_in
 
     public void start(){
         try {
-            //Registration_interface stub = (Registration_interface) UnicastRemoteObject.exportObject(this, 5000);
             Registry registry = LocateRegistry.createRegistry(porta_rmi);
             registry.rebind("Sign in", this);
         } catch (RemoteException e) {
@@ -26,8 +25,14 @@ public class Registration extends UnicastRemoteObject implements Registration_in
         }
     }
 
+    /**
+     * metodo usato per effettuare la registrazione di un client al servizio
+     * @param nickutente
+     * @param Password
+     * @return il risultato dell'operazione
+     * @throws RemoteException
+     */
     public String register(String nickutente, String Password) throws RemoteException{
-
         Hash_users obj = Singleton_db_utenti.getInstanceUtenti();
         String ret;
 

@@ -8,6 +8,9 @@ public class Singleton_db_utenti {
 
     private Hash_users utenti;
 
+    /**
+     * costruttore che recupera i dati persistenti se sono presenti
+     */
     private Singleton_db_utenti() {
         try (ObjectInputStream input = new ObjectInputStream(
                 new FileInputStream(Persistent_data.getInstance().getUser_folder()+"utenti.json"));) {
@@ -34,5 +37,4 @@ public class Singleton_db_utenti {
         }
         return istanza.utenti;
     }
-
 }
